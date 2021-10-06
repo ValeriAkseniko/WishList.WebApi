@@ -8,11 +8,13 @@ namespace WishList.Entities.Models
     {
         public Guid Id { get; set; }
 
-        public Guid UserId { get; set; }
-        public Profile User { get; set; }
+        public Guid AccountId { get; set; }
+        public Account Account { get; set; }
 
         public string Nickname { get; set; }
-        public string Gender { get; set; }
+        public Gender Gender { get; set; }
         public DateTime? Birthday { get; set; }
+
+        public List<WishList> WishLists { get; set; }
     }
 }

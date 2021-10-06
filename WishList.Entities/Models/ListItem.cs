@@ -9,7 +9,7 @@ namespace WishList.Entities.Models
         public Guid Id { get; set; }
 
         public Guid WishListId { get; set; }
-        public List<WishList> WishList { get; set; }
+        public WishList WishList { get; set; }
 
         public string Name { get; set; }
         public string Reference { get; set; }

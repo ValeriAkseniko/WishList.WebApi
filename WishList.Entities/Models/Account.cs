@@ -14,7 +14,7 @@ namespace WishList.Entities
         public Guid RoleId { get; set; }
         public Role Role { get; set; }
 
-        public Guid ProfelId { get; set; }
+        public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }
 
         public string Email { get; set; }

@@ -9,7 +9,9 @@ namespace WishList.Entities.Models
         public Guid Id { get; set; }
 
         public Guid OwnerId { get; set; }
-        public List<Profile> Owner { get; set; }
+        public Profile Owner { get; set; }
+
+        public List<ListItem> ListItems { get; set; }
 
         public string Name { get; set; }
         public string Description { get; set; }
