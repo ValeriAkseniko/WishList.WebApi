@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using WishList.Entities.Models;
 
-namespace WishList.Entities
+namespace WishList.Entities.Models
 {
     public class Account
     {
@@ -14,7 +15,8 @@ namespace WishList.Entities
         public Guid RoleId { get; set; }
         public Role Role { get; set; }
 
-        public Guid ProfileId { get; set; }
+        public Guid? ProfileId { get; set; }
+        [ForeignKey("ProfileId")]
         public Profile Profile { get; set; }
 
         public string Email { get; set; }
