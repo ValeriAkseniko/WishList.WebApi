@@ -11,10 +11,15 @@ namespace WishList.Entities.Models
         public Guid OwnerId { get; set; }
         public Profile Owner { get; set; }
 
-        public List<ListItem> ListItems { get; set; }
+        public ICollection<ListItem> ListItems { get; set; }
 
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime CreateDate { get; set; }
+
+        public WishList()
+        {
+            ListItems = new List<ListItem>();
+        }
     }
 }
