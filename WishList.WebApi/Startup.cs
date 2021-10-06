@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WishList.DataAccess;
+using WishList.DataAccess.Interfaces.Repositories;
+using WishList.DataAccess.Repositories;
 
 namespace WishList.WebApi
 {
@@ -28,6 +30,7 @@ namespace WishList.WebApi
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<WishListContext>(options => options.UseSqlServer(connection));
+            services.AddSingleton<IRoleRepository, RoleRepository>();
             services.AddControllers();
         }
 
