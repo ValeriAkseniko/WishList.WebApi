@@ -30,8 +30,10 @@ namespace WishList.WebApi
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<WishListContext>(options => options.UseSqlServer(connection));
-            services.AddSingleton<IRoleRepository, RoleRepository>();
+            //services.AddSingleton<IRoleRepository, RoleRepository>();
             services.AddControllers();
+
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,6 +42,15 @@ namespace WishList.WebApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            if (!env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(
+                    c => 
+                    {
+                        c.SwaggerEndpoint("/swagger/v1/swagger.json", "WishList API V1"); 
+                    });
             }
 
             app.UseRouting();
