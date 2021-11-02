@@ -45,5 +45,13 @@ namespace WishList.WebApi.Controllers
             List<Account> accounts = await wishListContext.Accounts.ToListAsync();
             return accounts;
         }
+
+        [HttpGet]
+        [Route("Get")]
+        public async Task<Account> GetAccounte(Guid id)
+        {
+            Account account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Id == id);
+            return account;
+        }
     }
 }
