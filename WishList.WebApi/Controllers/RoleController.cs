@@ -43,5 +43,13 @@ namespace WishList.WebApi.Controllers
             List<Role> roles = await wishListContext.Roles.ToListAsync();
             return roles;
         }
+
+        [HttpGet]
+        [Route("Get")]
+        public async Task<Role> GetRole(Guid id)
+        {
+            Role role = await wishListContext.Roles.FirstOrDefaultAsync(x => x.Id == id);
+            return role;
+        }
     }
 }
