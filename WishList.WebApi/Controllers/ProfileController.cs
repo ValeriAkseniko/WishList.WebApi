@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,6 +25,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("ProfileCreate")]
+        [Authorize]
         public async Task Create([FromBody] ProfileCreateRequest profileCreateRequest)
         {
             Profile profile = new Profile()
@@ -40,6 +42,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListProfile")]
+        [Authorize]
         public async Task<List<Profile>> GetListProfile()
         {
             List<Profile> profiles = await wishListContext.Profiles.ToListAsync();
@@ -48,6 +51,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
+        [Authorize]
         public async Task<Profile> Get(Guid id)
         {
             Profile profile = await wishListContext.Profiles.Include(x=>x.Account).FirstOrDefaultAsync(x => x.Id == id);
@@ -56,6 +60,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("GetByAccountId")]
+        [Authorize]
         public async Task<Profile> GetByAccountId(Guid id)
         {
             Profile profile = await wishListContext.Profiles.FirstOrDefaultAsync(x => x.AccountId == id);

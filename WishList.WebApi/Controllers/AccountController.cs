@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using WishList.DataAccess;
 using WishList.DataTransferObjects.Accounts;
+using WishList.DataTransferObjects.Constants;
 using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
@@ -28,19 +29,28 @@ namespace WishList.WebApi.Controllers
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
-        public async Task Create([FromBody] AccountCreateRequest accountCreateRequest)
-        {
-            Account account = new Account()
+        public async Task<bool> Create([FromBody] AccountCreateRequest accountCreateRequest)
+        {            
+            var existAccount = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Login == accountCreateRequest.Login);
+            if (existAccount == null)
             {
-                CreateDate = DateTime.Now,
-                Email = accountCreateRequest.Email,
-                HashPassword = accountCreateRequest.Password,
-                Id = Guid.NewGuid(),
-                Login = accountCreateRequest.Login,
-                RoleId = Guid.Parse("375af7cc-a281-4432-a3f5-14af10bf73f6")
-            };
-            await wishListContext.Accounts.AddAsync(account);
-            await wishListContext.SaveChangesAsync();
+                Account account = new Account()
+                {
+                    CreateDate = DateTime.Now,
+                    Email = accountCreateRequest.Email,
+                    HashPassword = accountCreateRequest.Password,
+                    Id = Guid.NewGuid(),
+                    Login = accountCreateRequest.Login,
+                    RoleId = Permission.Id.DefaultUser
+                };
+                await wishListContext.Accounts.AddAsync(account);
+                await wishListContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         [HttpGet]
@@ -55,6 +65,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
+        [Authorize]
         public async Task<Account> GetAccounte(Guid id)
         {
             Account account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Id == id);
@@ -63,6 +74,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [AllowAnonymous]
         public async Task Login(string Login, string Password)
         {
             Account account = await wishListContext.Accounts.FirstOrDefaultAsync(u => u.Login == Login && u.HashPassword == Password);

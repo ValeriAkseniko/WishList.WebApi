@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,6 +24,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("Create")]
+        [Authorize]
         public async Task Create([FromBody] WishListItemCreateRequest wishListItemCreateRequest)
         {
             ListItem listItem = new ListItem()
@@ -42,6 +44,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("GetListItems")]
+        [Authorize]
         public async Task<List<ListItem>> GetListItems(Guid wishListId)
         {
             List<ListItem> listItems = await wishListContext.ListItems.Where(x => x.WishListId == wishListId).ToListAsync();
@@ -50,6 +53,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
+        [AllowAnonymous]
         public async Task<ListItem> Get(Guid id)
         {
             ListItem listitem = await wishListContext.ListItems.FirstOrDefaultAsync(x => x.Id == id);
@@ -58,6 +62,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpDelete]
         [Route("Delete")]
+        [Authorize]
         public async Task Delete(Guid itemId)
         {
             ListItem listItem = await Get(itemId);
