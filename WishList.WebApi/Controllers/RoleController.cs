@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,6 +24,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("Create")]
+        [Authorize]
         public async Task Create([FromBody] RoleCreateRequest roleCreateRequest)
         {
             Role role = new Role()
@@ -38,6 +40,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListRoles")]
+        [Authorize]
         public async Task<List<Role>> GetListRoles()
         {
             List<Role> roles = await wishListContext.Roles.ToListAsync();
@@ -46,6 +49,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
+        [Authorize]
         public async Task<Role> GetRole(Guid id)
         {
             Role role = await wishListContext.Roles.FirstOrDefaultAsync(x => x.Id == id);
