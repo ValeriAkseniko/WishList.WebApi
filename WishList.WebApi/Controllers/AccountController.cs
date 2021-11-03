@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WishList.DataAccess;
 using WishList.DataTransferObjects.Accounts;
@@ -23,6 +27,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("Create")]
+        [AllowAnonymous]
         public async Task Create([FromBody] AccountCreateRequest accountCreateRequest)
         {
             Account account = new Account()
@@ -32,7 +37,7 @@ namespace WishList.WebApi.Controllers
                 HashPassword = accountCreateRequest.Password,
                 Id = Guid.NewGuid(),
                 Login = accountCreateRequest.Login,
-                RoleId = Guid.Parse("3868C13D-8D12-46A6-B709-52BCF010BDFF")
+                RoleId = Guid.Parse("375af7cc-a281-4432-a3f5-14af10bf73f6")
             };
             await wishListContext.Accounts.AddAsync(account);
             await wishListContext.SaveChangesAsync();
@@ -40,8 +45,10 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListAccounts")]
+        [Authorize]
         public async Task<List<Account>> GetListAccount()
         {
+            var user = HttpContext.User.Identity.Name;
             List<Account> accounts = await wishListContext.Accounts.ToListAsync();
             return accounts;
         }
@@ -52,6 +59,32 @@ namespace WishList.WebApi.Controllers
         {
             Account account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Id == id);
             return account;
+        }
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task Login(string Login, string Password)
+        {
+            Account account = await wishListContext.Accounts.FirstOrDefaultAsync(u => u.Login == Login && u.HashPassword == Password);
+            if (account != null)
+            {
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, Login)
+                };
+                // создаем объект ClaimsIdentity
+                ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+                // установка аутентификационных куки
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+            }
+        }
+
+        [HttpPost]
+        [Route("Logout")]
+        [Authorize]
+        public async Task Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
     }
 }
