@@ -25,21 +25,32 @@ namespace WishList.WebApi.Controllers
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task Create([FromBody] WishListItemCreateRequest wishListItemCreateRequest)
+        public async Task<bool> Create([FromBody] WishListItemCreateRequest wishListItemCreateRequest)
         {
-            ListItem listItem = new ListItem()
+            var user = HttpContext.User.Identity.Name;
+            var account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Login == user);
+            var wishlist = await wishListContext.WishLists.FirstOrDefaultAsync(x => x.Id == wishListItemCreateRequest.WishListId);
+            if (account.ProfileId == wishlist.OwnerId)
             {
-                Id = Guid.NewGuid(),
-                Description = wishListItemCreateRequest.Description,
-                CreateDate = DateTime.Now,
-                WishListId = wishListItemCreateRequest.WishListId,
-                Name = wishListItemCreateRequest.Name,
-                Price = wishListItemCreateRequest.Price,
-                Reference = wishListItemCreateRequest.Reference,
-                Received = false
-            };
-            await wishListContext.ListItems.AddAsync(listItem);
-            await wishListContext.SaveChangesAsync();
+                ListItem listItem = new ListItem()
+                {
+                    Id = Guid.NewGuid(),
+                    Description = wishListItemCreateRequest.Description,
+                    CreateDate = DateTime.Now,
+                    WishListId = wishListItemCreateRequest.WishListId,
+                    Name = wishListItemCreateRequest.Name,
+                    Price = wishListItemCreateRequest.Price,
+                    Reference = wishListItemCreateRequest.Reference,
+                    Received = false
+                };
+                await wishListContext.ListItems.AddAsync(listItem);
+                await wishListContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         [HttpGet]
@@ -47,8 +58,20 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task<List<ListItem>> GetListItems(Guid wishListId)
         {
-            List<ListItem> listItems = await wishListContext.ListItems.Where(x => x.WishListId == wishListId).ToListAsync();
-            return listItems;
+            var user = HttpContext.User.Identity.Name;
+            var account = await wishListContext.Accounts
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Login == user);
+            var wishlist = await wishListContext.WishLists.FirstOrDefaultAsync(x => x.Id == wishListId);
+            if (account.Role.Name == "Admin" || account.ProfileId == wishlist.OwnerId)
+            {
+                List<ListItem> listItems = await wishListContext.ListItems.Where(x => x.WishListId == wishListId).ToListAsync();
+                return listItems;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         [HttpGet]
@@ -56,19 +79,47 @@ namespace WishList.WebApi.Controllers
         [AllowAnonymous]
         public async Task<ListItem> Get(Guid id)
         {
-            ListItem listitem = await wishListContext.ListItems.FirstOrDefaultAsync(x => x.Id == id);
-            return listitem;
+            var user = HttpContext.User.Identity.Name;
+            var account = await wishListContext.Accounts
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Login == user);
+            var wishlist = await wishListContext.ListItems
+                .Include(x => x.WishListId)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (account.ProfileId == wishlist.WishList.OwnerId || account.Role.Name == "Admin")
+            {
+                ListItem listitem = await wishListContext.ListItems.FirstOrDefaultAsync(x => x.Id == id);
+                return listitem;
+            }
+            else
+            {
+                return null;
+            }
+
         }
 
         [HttpDelete]
         [Route("Delete")]
         [Authorize]
-        public async Task Delete(Guid itemId)
+        public async Task<bool> Delete(Guid itemId)
         {
-            ListItem listItem = await Get(itemId);
-            wishListContext.Entry(listItem).State = EntityState.Deleted;
-            wishListContext.ListItems.Remove(listItem);
-            await wishListContext.SaveChangesAsync();
+            var user = HttpContext.User.Identity.Name;
+            var account = await wishListContext.Accounts
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Login == user);
+            var item = await wishListContext.ListItems.Include(x=>x.WishList).FirstOrDefaultAsync(x => x.Id == itemId);
+            if (account.Role.Name == "Admin" || item.WishList.OwnerId == account.ProfileId)
+            {
+                ListItem listItem = await Get(itemId);
+                wishListContext.Entry(listItem).State = EntityState.Deleted;
+                wishListContext.ListItems.Remove(listItem);
+                await wishListContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

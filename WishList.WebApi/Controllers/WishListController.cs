@@ -27,7 +27,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [Authorize]
+        [Authorize(Roles ="DefaultUser")]
         public async Task Create(WishListCreateRequest wishListCreateRequest)
         {
             var user = HttpContext.User.Identity.Name;
@@ -48,7 +48,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("GetList")]
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<List<WishListDb>> GetListWishlist()
         {
             List<WishListDb> list = await wishListContext.WishLists.ToListAsync();
@@ -81,7 +81,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("GetByOwner")]
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<List<WishListDb>> GetByOwner(Guid ownerId)
         {
             List<WishListDb> list = await wishListContext.WishLists.Where(x => x.OwnerId == ownerId).ToListAsync();
@@ -91,12 +91,24 @@ namespace WishList.WebApi.Controllers
         [HttpDelete]
         [Route("Delete")]
         [Authorize]
-        public async Task Delete(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            WishListDb item = await wishListContext.WishLists.FirstOrDefaultAsync(x => x.Id == id);
-            wishListContext.Entry(item).State = EntityState.Deleted;
-            wishListContext.WishLists.Remove(item);
-            await wishListContext.SaveChangesAsync();
+            var user = HttpContext.User.Identity.Name;            
+            var account = await wishListContext.Accounts
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Login == user);
+            var item = await wishListContext.WishLists.FirstOrDefaultAsync(x => x.Id == id);
+            if (account.Role.Name == "Admin" || item.OwnerId == account.ProfileId)
+            {
+                wishListContext.Entry(item).State = EntityState.Deleted;
+                wishListContext.WishLists.Remove(item);
+                await wishListContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
