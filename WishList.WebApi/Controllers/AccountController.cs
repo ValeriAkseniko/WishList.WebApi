@@ -55,7 +55,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListAccounts")]
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public async Task<List<Account>> GetListAccount()
         {
             var user = HttpContext.User.Identity.Name;
@@ -65,7 +65,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<Account> GetAccounte(Guid id)
         {
             Account account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Id == id);
@@ -77,12 +77,13 @@ namespace WishList.WebApi.Controllers
         [AllowAnonymous]
         public async Task Login(string Login, string Password)
         {
-            Account account = await wishListContext.Accounts.FirstOrDefaultAsync(u => u.Login == Login && u.HashPassword == Password);
+            Account account = await wishListContext.Accounts.Include(x=>x.Role).FirstOrDefaultAsync(u => u.Login == Login && u.HashPassword == Password);
             if (account != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, Login)
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, Login),
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, account.Role.Name)
                 };
                 // создаем объект ClaimsIdentity
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
