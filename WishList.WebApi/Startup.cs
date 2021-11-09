@@ -31,8 +31,10 @@ namespace WishList.WebApi
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<WishListContext>(options => options.UseSqlServer(connection));
-            //services.AddSingleton<IRoleRepository, RoleRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddControllers();
+            
 
             services.AddSwaggerGen();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
