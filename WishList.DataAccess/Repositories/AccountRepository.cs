@@ -46,12 +46,12 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Account>> ListAsync(int page,int pageSize)
+        public async Task<List<Account>> ListAsync(int page, int pageSize)
         {
             return await wishListContext.Accounts
                 .Include(x => x.Role)
                 .Include(x => x.Profile)
-                .OrderBy(x=>x.Login)
+                .OrderBy(x => x.Login)
                 .Skip(page * pageSize).Take(pageSize)
                 .ToListAsync();
         }
