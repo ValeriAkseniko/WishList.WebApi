@@ -24,7 +24,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [Authorize]
+        [Authorize(Roles ="admin")]
         public async Task Create([FromBody] RoleCreateRequest roleCreateRequest)
         {
             Role role = new Role()
@@ -40,7 +40,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListRoles")]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public async Task<List<Role>> GetListRoles()
         {
             List<Role> roles = await wishListContext.Roles.ToListAsync();
@@ -49,7 +49,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public async Task<Role> GetRole(Guid id)
         {
             Role role = await wishListContext.Roles.FirstOrDefaultAsync(x => x.Id == id);

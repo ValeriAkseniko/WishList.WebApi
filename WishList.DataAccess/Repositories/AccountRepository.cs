@@ -30,12 +30,12 @@ namespace WishList.DataAccess.Repositories
 
         public async Task<Account> GetAsync(Guid id)
         {
-            return await wishListContext.Accounts.Include(x=>x.Role).FirstOrDefaultAsync(x => x.Id == id);
+            return await wishListContext.Accounts.Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Account> GetAsync(string login)
         {
-            return await wishListContext.Accounts.Include(x=>x.Role).FirstOrDefaultAsync(x => x.Login == login);
+            return await wishListContext.Accounts.Include(x => x.Role).FirstOrDefaultAsync(x => x.Login == login);
         }
 
         public async Task<List<Account>> ListAsync()
@@ -46,11 +46,12 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Account>> ListAsync(int page,int pageSize)
+        public async Task<List<Account>> ListAsync(int page, int pageSize)
         {
             return await wishListContext.Accounts
                 .Include(x => x.Role)
                 .Include(x => x.Profile)
+                .OrderBy(x => x.Login)
                 .Skip(page * pageSize).Take(pageSize)
                 .ToListAsync();
         }
