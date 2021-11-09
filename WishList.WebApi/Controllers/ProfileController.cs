@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WishList.DataAccess;
+using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Profile;
 using WishList.Entities.Models;
 
@@ -16,11 +17,11 @@ namespace WishList.WebApi.Controllers
     [ApiController]
     public class ProfileController : ControllerBase
     {
-        private readonly WishListContext wishListContext;
+        private readonly IProfileRepository profileRepository;
 
-        public ProfileController(WishListContext wishListContext)
+        public ProfileController(IProfileRepository profileRepository)
         {
-            this.wishListContext = wishListContext;
+            this.profileRepository = profileRepository;
         }
 
         [HttpPost]
@@ -36,8 +37,7 @@ namespace WishList.WebApi.Controllers
                 Gender = (Gender)profileCreateRequest.Gender,
                 Nickname = profileCreateRequest.Nickname
             };
-            await wishListContext.Profiles.AddAsync(profile);
-            await wishListContext.SaveChangesAsync();
+            await profileRepository.Create(profile);
         }
 
         [HttpGet]
@@ -45,8 +45,7 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task<List<Profile>> GetListProfile()
         {
-            List<Profile> profiles = await wishListContext.Profiles.ToListAsync();
-            return profiles;
+            return await profileRepository.ListAsync();
         }
 
         [HttpGet]
@@ -54,8 +53,7 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task<Profile> Get(Guid id)
         {
-            Profile profile = await wishListContext.Profiles.Include(x=>x.Account).FirstOrDefaultAsync(x => x.Id == id);
-            return profile;
+            return await profileRepository.GetAsync(id);
         }
 
         [HttpGet]
@@ -63,8 +61,7 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task<Profile> GetByAccountId(Guid id)
         {
-            Profile profile = await wishListContext.Profiles.FirstOrDefaultAsync(x => x.AccountId == id);
-            return profile;
+            return await profileRepository.GetAsyncByAccountId(id);
         }
     }
 }

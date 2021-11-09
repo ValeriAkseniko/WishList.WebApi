@@ -21,8 +21,7 @@ namespace WishList.DataAccess.Repositories
 
         public async Task<Role> GetAsync(Guid id)
         {
-            Role result = await wishListContext.Roles.FirstOrDefaultAsync(x => x.Id == id);
-            return result;
+            return await wishListContext.Roles.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Role>> ListAsync()

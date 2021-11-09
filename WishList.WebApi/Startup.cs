@@ -33,6 +33,7 @@ namespace WishList.WebApi
             services.AddDbContext<WishListContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddControllers();
             
 
