@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WishList.DataAccess;
+using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Accounts;
 using WishList.DataTransferObjects.Constants;
 using WishList.Entities.Models;
@@ -20,18 +20,19 @@ namespace WishList.WebApi.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly WishListContext wishListContext;
-        public AccountController(WishListContext wishListContext)
+        private readonly IAccountRepository accountRepository;
+
+        public AccountController(IAccountRepository accountRepository)
         {
-            this.wishListContext = wishListContext;
+            this.accountRepository = accountRepository;
         }
 
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
         public async Task<bool> Create([FromBody] AccountCreateRequest accountCreateRequest)
-        {            
-            var existAccount = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Login == accountCreateRequest.Login);
+        {
+            var existAccount = await accountRepository.GetAsync(accountCreateRequest.Login);
             if (existAccount == null)
             {
                 Account account = new Account()
@@ -43,8 +44,7 @@ namespace WishList.WebApi.Controllers
                     Login = accountCreateRequest.Login,
                     RoleId = Permission.Id.DefaultUser
                 };
-                await wishListContext.Accounts.AddAsync(account);
-                await wishListContext.SaveChangesAsync();
+                await accountRepository.Create(account);
                 return true;
             }
             else
@@ -58,8 +58,7 @@ namespace WishList.WebApi.Controllers
         [Authorize(Roles="Admin")]
         public async Task<List<Account>> GetListAccount()
         {
-            var user = HttpContext.User.Identity.Name;
-            List<Account> accounts = await wishListContext.Accounts.ToListAsync();
+            List<Account> accounts = await accountRepository.ListAsync();
             return accounts;
         }
 
@@ -68,21 +67,21 @@ namespace WishList.WebApi.Controllers
         [Authorize(Roles ="Admin")]
         public async Task<Account> GetAccounte(Guid id)
         {
-            Account account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Id == id);
+            Account account = await accountRepository.GetAsync(id);
             return account;
         }
 
         [HttpPost]
         [Route("Login")]
         [AllowAnonymous]
-        public async Task Login(string Login, string Password)
+        public async Task Login(string login, string password)
         {
-            Account account = await wishListContext.Accounts.Include(x=>x.Role).FirstOrDefaultAsync(u => u.Login == Login && u.HashPassword == Password);
-            if (account != null)
+            Account account = await accountRepository.GetAsync(login);
+            if (account.HashPassword == password && account != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, Login),
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, login),
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, account.Role.Name)
                 };
                 // создаем объект ClaimsIdentity
