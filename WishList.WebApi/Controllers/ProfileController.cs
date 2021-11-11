@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using WishList.DataAccess;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Profile;
 using WishList.Entities.Models;
