@@ -44,7 +44,7 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Profile>> ListAsync(int page , int pageSize)
+        public async Task<List<Profile>> ListAsync(int page, int pageSize)
         {
             return await wishListContext.Profiles
                 .Include(x => x.Account)
@@ -53,7 +53,7 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task Update(Profile profile,Guid id)
+        public async Task UpdateAsync(Profile profile, Guid id)
         {
             var entity = await GetAsync(id);
             entity.AccountId = profile.AccountId;

@@ -18,7 +18,7 @@ namespace WishList.DataAccess.Interfaces.Repositories
 
         Task<List<Profile>> ListAsync(int page, int pageSize);
 
-        Task Update(Profile profile, Guid id);
-        
+        Task UpdateAsync(Profile profile, Guid id);
+
     }
 }
