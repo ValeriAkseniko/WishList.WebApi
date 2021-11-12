@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WishList.DataAccess;
+using WishList.DataAccess.Interfaces.Repositories;
+using WishList.DataAccess.Repositories;
 using WishList.DataTransferObjects.WishListItems;
+using WishList.DataTransferObjects.WishLists;
 using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
@@ -16,35 +19,47 @@ namespace WishList.WebApi.Controllers
     [ApiController]
     public class WishListItemController : ControllerBase
     {
-        private readonly WishListContext wishListContext;
-        public WishListItemController(WishListContext wishListContext)
+        private readonly IWishListItemRepository wishListItemRepository;
+        private readonly IAccountRepository accountRepository;
+        private readonly IProfileRepository profileRepository;
+        private readonly IWishListRepositoty wishlistRepository;
+
+        public WishListItemController(IWishListItemRepository wishListItemRepository, IWishListRepositoty wishListRepositoty, IAccountRepository accountRepository, IProfileRepository profileRepository)
         {
-            this.wishListContext = wishListContext;
+            this.wishListItemRepository = wishListItemRepository;
+            this.accountRepository = accountRepository;
+            this.profileRepository = profileRepository;
+            this.wishlistRepository = wishListRepositoty;
         }
 
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task<bool> Create([FromBody] WishListItemCreateRequest wishListItemCreateRequest)
+        public async Task<bool> Create([FromBody] List<WishListItemCreateRequest> wishListItemCreateRequest)
         {
             var user = HttpContext.User.Identity.Name;
-            var account = await wishListContext.Accounts.FirstOrDefaultAsync(x => x.Login == user);
-            var wishlist = await wishListContext.WishLists.FirstOrDefaultAsync(x => x.Id == wishListItemCreateRequest.WishListId);
-            if (account.ProfileId == wishlist.OwnerId)
+            var account = await accountRepository.GetAsync(user);
+            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var wishlist = await wishlistRepository.GetAsync(wishListItemCreateRequest[0].WishListId);
+            if (profile.Id == wishlist.OwnerId)
             {
-                ListItem listItem = new ListItem()
+                List<ListItem> listItems = new List<ListItem>();
+                foreach (var item in wishListItemCreateRequest)
                 {
-                    Id = Guid.NewGuid(),
-                    Description = wishListItemCreateRequest.Description,
-                    CreateDate = DateTime.Now,
-                    WishListId = wishListItemCreateRequest.WishListId,
-                    Name = wishListItemCreateRequest.Name,
-                    Price = wishListItemCreateRequest.Price,
-                    Reference = wishListItemCreateRequest.Reference,
-                    Received = false
-                };
-                await wishListContext.ListItems.AddAsync(listItem);
-                await wishListContext.SaveChangesAsync();
+                    ListItem createItem = new ListItem()
+                    {
+                        Id = Guid.NewGuid(),
+                        Description = item.Description,
+                        CreateDate = DateTime.Now,
+                        WishListId = item.WishListId,
+                        Name = item.Name,
+                        Price = item.Price,
+                        Reference = item.Reference,
+                        Received = false
+                    };
+                    listItems.Add(createItem);
+                }
+                await wishListItemRepository.CreateAsync(listItems);
                 return true;
             }
             else
@@ -56,17 +71,28 @@ namespace WishList.WebApi.Controllers
         [HttpGet]
         [Route("GetListItems")]
         [Authorize]
-        public async Task<List<ListItem>> GetListItems(Guid wishListId)
+        public async Task<List<WishListItemView>> GetListItems(Guid wishListId)
         {
             var user = HttpContext.User.Identity.Name;
-            var account = await wishListContext.Accounts
-                .Include(x => x.Role)
-                .FirstOrDefaultAsync(x => x.Login == user);
-            var wishlist = await wishListContext.WishLists.FirstOrDefaultAsync(x => x.Id == wishListId);
-            if (account.Role.Name == "Admin" || account.ProfileId == wishlist.OwnerId)
+            var account = await accountRepository.GetAsync(user);
+            var wishlist = await wishlistRepository.GetAsync(wishListId);
+            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            if (account.Role.Name == "Admin" || profile.Id == wishlist.OwnerId)
             {
-                List<ListItem> listItems = await wishListContext.ListItems.Where(x => x.WishListId == wishListId).ToListAsync();
-                return listItems;
+                List<WishListItemView> listItemView = new List<WishListItemView>();
+                foreach (var item in wishlist.ListItems)
+                {
+                    WishListItemView itemView = new WishListItemView
+                    {
+                        Description = item.Description,
+                        Id = item.Id,
+                        Name = item.Name,
+                        Received = item.Received,
+                        Reference = item.Reference
+                    };
+                    listItemView.Add(itemView);
+                }
+                return listItemView;
             }
             else
             {
@@ -77,19 +103,24 @@ namespace WishList.WebApi.Controllers
         [HttpGet]
         [Route("Get")]
         [AllowAnonymous]
-        public async Task<ListItem> Get(Guid id)
+        public async Task<WishListItemView> Get(Guid id)
         {
             var user = HttpContext.User.Identity.Name;
-            var account = await wishListContext.Accounts
-                .Include(x => x.Role)
-                .FirstOrDefaultAsync(x => x.Login == user);
-            var wishlist = await wishListContext.ListItems
-                .Include(x => x.WishListId)
-                .FirstOrDefaultAsync(x => x.Id == id);
-            if (account.ProfileId == wishlist.WishList.OwnerId || account.Role.Name == "Admin")
+            var account = await accountRepository.GetAsync(user);
+            var listItem = await wishListItemRepository.GetAsync(id);
+            var wishlist = await wishlistRepository.GetAsync(listItem.WishListId);
+            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            if (profile.Id == wishlist.OwnerId || account.Role.Name == "Admin")
             {
-                ListItem listitem = await wishListContext.ListItems.FirstOrDefaultAsync(x => x.Id == id);
-                return listitem;
+                WishListItemView itemView = new WishListItemView
+                {
+                    Description = listItem.Description,
+                    Id = listItem.Id,
+                    Name = listItem.Name,
+                    Received = listItem.Received,
+                    Reference = listItem.Reference
+                };
+                return itemView;
             }
             else
             {
@@ -101,19 +132,16 @@ namespace WishList.WebApi.Controllers
         [HttpDelete]
         [Route("Delete")]
         [Authorize]
-        public async Task<bool> Delete(Guid itemId)
+        public async Task<bool> Delete(Guid id)
         {
             var user = HttpContext.User.Identity.Name;
-            var account = await wishListContext.Accounts
-                .Include(x => x.Role)
-                .FirstOrDefaultAsync(x => x.Login == user);
-            var item = await wishListContext.ListItems.Include(x=>x.WishList).FirstOrDefaultAsync(x => x.Id == itemId);
-            if (account.Role.Name == "Admin" || item.WishList.OwnerId == account.ProfileId)
+            var account = await accountRepository.GetAsync(user);
+            var item = await wishListItemRepository.GetAsync(id);
+            var wishList = await wishlistRepository.GetAsync(item.WishListId);
+            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            if (account.Role.Name == "Admin" || wishList.OwnerId == profile.Id)
             {
-                ListItem listItem = await Get(itemId);
-                wishListContext.Entry(listItem).State = EntityState.Deleted;
-                wishListContext.ListItems.Remove(listItem);
-                await wishListContext.SaveChangesAsync();
+                await wishListItemRepository.DeleteAsync(id);
                 return true;
             }
             else

@@ -11,11 +11,11 @@ using WishListDb = WishList.Entities.Models.WishList;
 
 namespace WishList.DataAccess.Repositories
 {
-    public class WishlistRepository : IWishListRepositoty
+    public class IWishlistRepository : IWishListRepositoty
     {
         private readonly WishListContext wishListContext;
 
-        public WishlistRepository(WishListContext wishListContext)
+        public IWishlistRepository(WishListContext wishListContext)
         {
             this.wishListContext = wishListContext;
         }
