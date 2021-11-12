@@ -46,7 +46,7 @@ namespace WishList.DataAccess.Repositories
             entity.Price = newItem.Price;
             entity.Received = newItem.Received;
             entity.Reference = newItem.Reference;
-            entity.WishList = newItem.WishList;
+            entity.WishListId = newItem.WishListId;
             entity.CreateDate = newItem.CreateDate;
             wishListContext.Entry(entity).State = EntityState.Modified;
             await wishListContext.SaveChangesAsync();
