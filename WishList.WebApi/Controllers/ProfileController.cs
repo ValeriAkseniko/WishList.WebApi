@@ -22,22 +22,6 @@ namespace WishList.WebApi.Controllers
             this.accountRepository = accountRepository;
         }
 
-        [HttpPost]
-        [Route("ProfileCreate")]
-        [Authorize]
-        public async Task Create([FromBody] ProfileCreateRequest profileCreateRequest)
-        {
-            Profile profile = new Profile()
-            {
-                AccountId = profileCreateRequest.AccountId,
-                Birthday = profileCreateRequest.Birthday,
-                Id = Guid.NewGuid(),
-                Gender = (Gender)profileCreateRequest.Gender,
-                Nickname = profileCreateRequest.Nickname
-            };
-            await profileRepository.Create(profile);
-        }
-
         [HttpGet]
         [Route("ListProfile")]
         [Authorize]

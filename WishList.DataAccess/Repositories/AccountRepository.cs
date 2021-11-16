@@ -62,5 +62,13 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
+        public async Task UpdateProfileIdAsync(Guid profileId,Guid accountId)
+        {
+            var entity = await GetAsync(accountId);
+            entity.ProfileId = profileId;
+            wishListContext.Entry(entity).State = EntityState.Modified;
+            await wishListContext.SaveChangesAsync();
+        }
+
     }
 }

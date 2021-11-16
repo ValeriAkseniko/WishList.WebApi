@@ -47,6 +47,13 @@ namespace WishList.WebApi.Controllers
                     RoleId = Permission.Id.DefaultUser
                 };
                 await accountRepository.Create(account);
+                Profile profile = new Profile()
+                {
+                    AccountId = account.Id,
+                    Id = Guid.NewGuid()
+                };
+                await profileRepository.Create(profile);
+                await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
                 return true;
             }
             else
