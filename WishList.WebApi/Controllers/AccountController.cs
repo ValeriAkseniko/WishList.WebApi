@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Accounts;
@@ -19,10 +21,12 @@ namespace WishList.WebApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountRepository accountRepository;
+        private readonly IProfileRepository profileRepository;
 
-        public AccountController(IAccountRepository accountRepository)
+        public AccountController(IAccountRepository accountRepository, IProfileRepository profileRepository)
         {
             this.accountRepository = accountRepository;
+            this.profileRepository = profileRepository;
         }
 
         [HttpPost]
@@ -37,7 +41,7 @@ namespace WishList.WebApi.Controllers
                 {
                     CreateDate = DateTime.Now,
                     Email = accountCreateRequest.Email,
-                    HashPassword = accountCreateRequest.Password,
+                    HashPassword = GetHash(accountCreateRequest.Password),
                     Id = Guid.NewGuid(),
                     Login = accountCreateRequest.Login,
                     RoleId = Permission.Id.DefaultUser
@@ -53,7 +57,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListAccounts")]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<List<Account>> GetListAccount()
         {
             List<Account> accounts = await accountRepository.ListAsync();
@@ -62,7 +66,7 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<Account> GetAccounte(Guid id)
         {
             Account account = await accountRepository.GetAsync(id);
@@ -75,7 +79,7 @@ namespace WishList.WebApi.Controllers
         public async Task Login(string login, string password)
         {
             Account account = await accountRepository.GetAsync(login);
-            if (account.HashPassword == password && account != null)
+            if (account.HashPassword == GetHash(password) && account != null)
             {
                 var claims = new List<Claim>
                 {
@@ -95,6 +99,14 @@ namespace WishList.WebApi.Controllers
         public async Task Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        private string GetHash(string input)
+        {
+            var md5 = MD5.Create();
+            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+            return Convert.ToBase64String(hash);
         }
     }
 }
