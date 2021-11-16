@@ -14,10 +14,12 @@ namespace WishList.WebApi.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly IProfileRepository profileRepository;
+        private readonly IAccountRepository accountRepository;
 
-        public ProfileController(IProfileRepository profileRepository)
+        public ProfileController(IProfileRepository profileRepository,IAccountRepository accountRepository)
         {
             this.profileRepository = profileRepository;
+            this.accountRepository = accountRepository;
         }
 
         [HttpPost]
@@ -58,6 +60,18 @@ namespace WishList.WebApi.Controllers
         public async Task<Profile> GetByAccountId(Guid id)
         {
             return await profileRepository.GetAsyncByAccountId(id);
+        }
+
+        [HttpGet]
+        [Route("GetMyProfile")]
+        [Authorize()]
+
+        public async Task<Profile> GetMyProfile()
+        {
+            var user = HttpContext.User.Identity.Name;
+            var account = await accountRepository.GetAsync(user);
+            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            return profile;
         }
     }
 }

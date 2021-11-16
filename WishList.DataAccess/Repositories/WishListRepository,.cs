@@ -70,6 +70,7 @@ namespace WishList.DataAccess.Repositories
         public async Task<List<WishListDb>> ListAsync(Guid profileId)
         {
             return await wishListContext.WishLists
+                .Include(x => x.ListItems)
                 .Where(x => x.OwnerId == profileId)
                 .ToListAsync();
         }
@@ -77,6 +78,7 @@ namespace WishList.DataAccess.Repositories
         public async Task<List<WishListDb>> ListAsync(Guid profileId, int page, int pageSize)
         {
             return await wishListContext.WishLists
+                .Include(x => x.ListItems)
                 .Where(x => x.OwnerId == profileId)
                 .OrderBy(x => x.Name)
                 .Skip(page * pageSize).Take(pageSize)
@@ -86,6 +88,8 @@ namespace WishList.DataAccess.Repositories
         public async Task<List<WishListDb>> ListAsync(int page, int pageSize)
         {
             return await wishListContext.WishLists
+                .Include(x => x.Owner)
+                .Include(x => x.ListItems)
                 .OrderBy(x => x.Name)
                 .Skip(page * pageSize).Take(pageSize)
                 .ToListAsync();
