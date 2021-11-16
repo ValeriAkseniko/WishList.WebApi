@@ -95,6 +95,37 @@ namespace WishList.WebApi.Controllers
         {
             return await wishListRepository.ListAsync(ownerId);
         }
+        [HttpGet]
+        [Route("GetMyWishlists")]
+        [Authorize]
+        public async Task<List<WishListView>> GetMyWishlists()
+        {
+            var user = HttpContext.User.Identity.Name;
+            var account = await accountRepository.GetAsync(user);
+            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var listWishlist = await wishListRepository.ListAsync(profile.Id);
+            List<WishListView> result = new List<WishListView>();
+            foreach (var item in listWishlist)
+            {
+                WishListView newItem = new WishListView()
+                {
+                    Description = item.Description,
+                    Id = item.Id,
+                    ListItems = item.ListItems.Select(x => new WishListItemView
+                    {
+                        Description = x.Description,
+                        Id = x.Id,
+                        Name = x.Name,
+                        Price = x.Price,
+                        Received = x.Received,
+                        Reference = x.Reference
+                    }).ToList(),
+                    Name = item.Name
+                };
+                result.Add(newItem);
+            }
+            return result;
+        }
 
         [HttpDelete]
         [Route("Delete")]
@@ -113,6 +144,6 @@ namespace WishList.WebApi.Controllers
             {
                 return false;
             }
-        }
+        }        
     }
 }
