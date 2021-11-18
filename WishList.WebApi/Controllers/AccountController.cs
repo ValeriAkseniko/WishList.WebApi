@@ -1,21 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using WishList.BusinessLogic.Interfaces;
-using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Accounts;
-using WishList.DataTransferObjects.Constants;
 using WishList.DataTransferObjects.Profile;
 using WishList.DataTransferObjects.Users;
-using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
 {
@@ -35,7 +25,7 @@ namespace WishList.WebApi.Controllers
         [AllowAnonymous]
         public async Task Create([FromBody] AccountCreateRequest accountCreateRequest)
         {
-            await userService.CreateAccount(accountCreateRequest);
+            await userService.CreateAccountAsync(accountCreateRequest);
         }
 
         [HttpGet]
@@ -43,7 +33,7 @@ namespace WishList.WebApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<List<UsersView>> GetListAccount()
         {
-            return await userService.GetUserList();
+            return await userService.GetUserListAsync();
         }
 
         [HttpGet]
@@ -51,7 +41,7 @@ namespace WishList.WebApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<UsersView> GetAccount()
         {
-            return await userService.GetUser();
+            return await userService.GetUserAsync();
         }
 
         [HttpPost]
@@ -59,7 +49,7 @@ namespace WishList.WebApi.Controllers
         [AllowAnonymous]
         public async Task Login(string login, string password)
         {
-            await userService.Login(login, password);
+            await userService.LoginAsync(login, password);
         }
 
         [HttpPost]
@@ -67,7 +57,7 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task Logout()
         {
-            await userService.Logout();
+            await userService.LogoutAsync();
         }
 
         [HttpPost]
@@ -75,7 +65,7 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task UpdateProfile([FromBody] ProfileUpdateRequest profileUpdateRequest)
         {
-            await userService.UpdateProfile(profileUpdateRequest);
+            await userService.UpdateMyProfileAsync(profileUpdateRequest);
         }
     }
 }

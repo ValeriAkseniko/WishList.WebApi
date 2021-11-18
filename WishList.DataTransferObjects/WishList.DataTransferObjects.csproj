@@ -4,8 +4,4 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\WishList.Entities\WishList.Entities.csproj" />
-  </ItemGroup>
-
 </Project>

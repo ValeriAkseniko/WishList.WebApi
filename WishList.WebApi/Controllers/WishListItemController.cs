@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using WishList.DataAccess;
 using WishList.DataAccess.Interfaces.Repositories;
-using WishList.DataAccess.Repositories;
 using WishList.DataTransferObjects.WishListItems;
-using WishList.DataTransferObjects.WishLists;
 using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
@@ -39,7 +34,7 @@ namespace WishList.WebApi.Controllers
         {
             var user = HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             var wishlist = await wishlistRepository.GetAsync(wishListItemCreateRequest[0].WishListId);
             if (profile.Id == wishlist.OwnerId)
             {
@@ -76,7 +71,7 @@ namespace WishList.WebApi.Controllers
             var user = HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
             var wishlist = await wishlistRepository.GetAsync(wishListId);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             if (account.Role.Name == "Admin" || profile.Id == wishlist.OwnerId)
             {
                 List<WishListItemView> listItemView = new List<WishListItemView>();
@@ -109,7 +104,7 @@ namespace WishList.WebApi.Controllers
             var account = await accountRepository.GetAsync(user);
             var listItem = await wishListItemRepository.GetAsync(id);
             var wishlist = await wishlistRepository.GetAsync(listItem.WishListId);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             if (profile.Id == wishlist.OwnerId || account.Role.Name == "Admin")
             {
                 WishListItemView itemView = new WishListItemView
@@ -138,7 +133,7 @@ namespace WishList.WebApi.Controllers
             var account = await accountRepository.GetAsync(user);
             var item = await wishListItemRepository.GetAsync(id);
             var wishList = await wishlistRepository.GetAsync(item.WishListId);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             if (account.Role.Name == "Admin" || wishList.OwnerId == profile.Id)
             {
                 await wishListItemRepository.DeleteAsync(id);

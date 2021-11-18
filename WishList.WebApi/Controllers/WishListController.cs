@@ -36,7 +36,7 @@ namespace WishList.WebApi.Controllers
         {
             var user = HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
 
             WishListDb wishList = new WishListDb()
             {
@@ -102,7 +102,7 @@ namespace WishList.WebApi.Controllers
         {
             var user = HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             var listWishlist = await wishListRepository.ListAsync(profile.Id);
             List<WishListView> result = new List<WishListView>();
             foreach (var item in listWishlist)

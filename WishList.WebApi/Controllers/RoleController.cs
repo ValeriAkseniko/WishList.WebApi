@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using WishList.BusinessLogic.Interfaces;
-using WishList.BusinessLogicServices;
 using WishList.DataAccess;
 using WishList.DataTransferObjects.Role;
 using WishList.Entities.Models;
@@ -47,7 +44,7 @@ namespace WishList.WebApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<List<RoleView>> GetListRoles()
         {
-            return await userService.ListRoles();
+            return await userService.ListRolesAsync();
         }
 
         [HttpGet]

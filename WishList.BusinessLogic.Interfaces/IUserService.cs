@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using WishList.DataTransferObjects.Accounts;
 using WishList.DataTransferObjects.Profile;
@@ -11,18 +9,18 @@ namespace WishList.BusinessLogic.Interfaces
 {
     public interface IUserService
     {
-        Task CreateAccount(AccountCreateRequest accountCreateRequest);
+        Task CreateAccountAsync(AccountCreateRequest accountCreateRequest);
 
-        Task<List<UsersView>> GetUserList();
+        Task<List<UsersView>> GetUserListAsync();
 
-        Task<UsersView> GetUser();
+        Task<UsersView> GetUserAsync();
 
-        Task Login(string login, string password);
+        Task LoginAsync(string login, string password);
 
-        Task Logout();
+        Task LogoutAsync();
 
-        Task UpdateProfile(ProfileUpdateRequest profileUpdateRequest);
+        Task UpdateMyProfileAsync(ProfileUpdateRequest profileUpdateRequest);
 
-        Task<List<RoleView>> ListRoles();
+        Task<List<RoleView>> ListRolesAsync();
     }
 }

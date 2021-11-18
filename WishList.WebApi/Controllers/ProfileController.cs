@@ -43,7 +43,7 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task<Profile> GetByAccountId(Guid id)
         {
-            return await profileRepository.GetAsyncByAccountId(id);
+            return await profileRepository.GetByAccountIdAsync(id);
         }
 
         [HttpGet]
@@ -54,7 +54,7 @@ namespace WishList.WebApi.Controllers
         {
             var user = HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             return profile;
         }
     }
