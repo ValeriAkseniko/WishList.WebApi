@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WishList.BusinessLogic.Interfaces;
+using WishList.BusinessLogicServices;
 using WishList.DataAccess;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataAccess.Repositories;
@@ -36,8 +38,10 @@ namespace WishList.WebApi
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IWishListRepositoty, IWishlistRepository>();
             services.AddScoped<IWishListItemRepository, WishListItemRepository>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddHttpContextAccessor();
             services.AddControllers();
-            
+
 
             services.AddSwaggerGen();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

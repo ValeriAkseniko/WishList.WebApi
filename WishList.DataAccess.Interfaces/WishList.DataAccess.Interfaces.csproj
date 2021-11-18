@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WishList.DataTransferObjects\WishList.DataTransferObjects.csproj" />
     <ProjectReference Include="..\WishList.Entities\WishList.Entities.csproj" />
   </ItemGroup>
 

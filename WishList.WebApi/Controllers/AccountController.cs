@@ -9,9 +9,12 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using WishList.BusinessLogic.Interfaces;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Accounts;
 using WishList.DataTransferObjects.Constants;
+using WishList.DataTransferObjects.Profile;
+using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
@@ -20,64 +23,35 @@ namespace WishList.WebApi.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountRepository accountRepository;
-        private readonly IProfileRepository profileRepository;
+        private readonly IUserService userService;
 
-        public AccountController(IAccountRepository accountRepository, IProfileRepository profileRepository)
+        public AccountController(IUserService userService)
         {
-            this.accountRepository = accountRepository;
-            this.profileRepository = profileRepository;
+            this.userService = userService;
         }
 
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
-        public async Task<bool> Create([FromBody] AccountCreateRequest accountCreateRequest)
+        public async Task Create([FromBody] AccountCreateRequest accountCreateRequest)
         {
-            var existAccount = await accountRepository.GetAsync(accountCreateRequest.Login);
-            if (existAccount == null)
-            {
-                Account account = new Account()
-                {
-                    CreateDate = DateTime.Now,
-                    Email = accountCreateRequest.Email,
-                    HashPassword = GetHash(accountCreateRequest.Password),
-                    Id = Guid.NewGuid(),
-                    Login = accountCreateRequest.Login,
-                    RoleId = Permission.Id.DefaultUser
-                };
-                await accountRepository.Create(account);
-                Profile profile = new Profile()
-                {
-                    AccountId = account.Id,
-                    Id = Guid.NewGuid()
-                };
-                await profileRepository.Create(profile);
-                await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            await userService.CreateAccount(accountCreateRequest);
         }
 
         [HttpGet]
         [Route("ListAccounts")]
         [Authorize(Roles = "Admin")]
-        public async Task<List<Account>> GetListAccount()
+        public async Task<List<UsersView>> GetListAccount()
         {
-            List<Account> accounts = await accountRepository.ListAsync();
-            return accounts;
+            return await userService.GetUserList();
         }
 
         [HttpGet]
         [Route("Get")]
         [Authorize(Roles = "Admin")]
-        public async Task<Account> GetAccounte(Guid id)
+        public async Task<UsersView> GetAccount()
         {
-            Account account = await accountRepository.GetAsync(id);
-            return account;
+            return await userService.GetUser();
         }
 
         [HttpPost]
@@ -85,19 +59,7 @@ namespace WishList.WebApi.Controllers
         [AllowAnonymous]
         public async Task Login(string login, string password)
         {
-            Account account = await accountRepository.GetAsync(login);
-            if (account.HashPassword == GetHash(password) && account != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, login),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, account.Role.Name)
-                };
-                // создаем объект ClaimsIdentity
-                ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                // установка аутентификационных куки
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-            }
+            await userService.Login(login, password);
         }
 
         [HttpPost]
@@ -105,15 +67,15 @@ namespace WishList.WebApi.Controllers
         [Authorize]
         public async Task Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await userService.Logout();
         }
 
-        private string GetHash(string input)
+        [HttpPost]
+        [Route("UpdateProfile")]
+        [Authorize]
+        public async Task UpdateProfile([FromBody] ProfileUpdateRequest profileUpdateRequest)
         {
-            var md5 = MD5.Create();
-            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-            return Convert.ToBase64String(hash);
+            await userService.UpdateProfile(profileUpdateRequest);
         }
     }
 }

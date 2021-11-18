@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
 
 namespace WishList.DataAccess.Interfaces.Repositories

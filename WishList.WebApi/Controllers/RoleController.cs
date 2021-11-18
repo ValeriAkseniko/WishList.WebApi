@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WishList.BusinessLogic.Interfaces;
+using WishList.BusinessLogicServices;
 using WishList.DataAccess;
 using WishList.DataTransferObjects.Role;
 using WishList.Entities.Models;
@@ -17,14 +19,16 @@ namespace WishList.WebApi.Controllers
     public class RoleController : ControllerBase
     {
         private readonly WishListContext wishListContext;
-        public RoleController(WishListContext wishListContext)
+        private readonly IUserService userService;
+        public RoleController(WishListContext wishListContext, IUserService userService)
         {
             this.wishListContext = wishListContext;
+            this.userService = userService;
         }
 
         [HttpPost]
         [Route("Create")]
-        [Authorize(Roles ="admin")]
+        [Authorize(Roles = "admin")]
         public async Task Create([FromBody] RoleCreateRequest roleCreateRequest)
         {
             Role role = new Role()
@@ -40,11 +44,10 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("ListRoles")]
-        [Authorize(Roles = "admin")]
-        public async Task<List<Role>> GetListRoles()
+        [Authorize(Roles = "Admin")]
+        public async Task<List<RoleView>> GetListRoles()
         {
-            List<Role> roles = await wishListContext.Roles.ToListAsync();
-            return roles;
+            return await userService.ListRoles();
         }
 
         [HttpGet]

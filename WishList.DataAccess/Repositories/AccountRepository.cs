@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WishList.DataAccess.Interfaces.Repositories;
+using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
 
 namespace WishList.DataAccess.Repositories
@@ -62,7 +63,7 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task UpdateProfileIdAsync(Guid profileId,Guid accountId)
+        public async Task UpdateProfileIdAsync(Guid profileId, Guid accountId)
         {
             var entity = await GetAsync(accountId);
             entity.ProfileId = profileId;
