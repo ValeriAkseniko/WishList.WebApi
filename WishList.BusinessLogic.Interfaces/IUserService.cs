@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WishList.DataTransferObjects.Accounts;
 using WishList.DataTransferObjects.Profile;
@@ -22,5 +23,11 @@ namespace WishList.BusinessLogic.Interfaces
         Task UpdateMyProfileAsync(ProfileUpdateRequest profileUpdateRequest);
 
         Task<List<RoleView>> ListRolesAsync();
+        Task CreateRoleAsync(RoleCreateRequest roleCreateRequest);
+        Task<RoleView> GetRoleAsync(Guid id);
+        Task<List<ProfileView>> GetListProfilesAsync();
+        Task<ProfileView> GetProfileAsync(Guid id);
+        Task<ProfileView> GetProfileByAccountIdAsync(Guid id);
+        Task<ProfileView> GetMyProfileAsync();
     }
 }

@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WishList.BusinessLogic.Interfaces;
-using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.WishListItems;
-using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
 {

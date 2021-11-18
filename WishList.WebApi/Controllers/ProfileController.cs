@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WishList.DataAccess.Interfaces.Repositories;
+using WishList.BusinessLogic.Interfaces;
 using WishList.DataTransferObjects.Profile;
-using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
 {
@@ -13,49 +12,44 @@ namespace WishList.WebApi.Controllers
     [ApiController]
     public class ProfileController : ControllerBase
     {
-        private readonly IProfileRepository profileRepository;
-        private readonly IAccountRepository accountRepository;
+        private readonly IUserService userService;
 
-        public ProfileController(IProfileRepository profileRepository,IAccountRepository accountRepository)
+        public ProfileController(IUserService userService)
         {
-            this.profileRepository = profileRepository;
-            this.accountRepository = accountRepository;
+            this.userService = userService;
         }
 
         [HttpGet]
         [Route("ListProfile")]
         [Authorize]
-        public async Task<List<Profile>> GetListProfile()
+        public async Task<List<ProfileView>> GetListProfiles()
         {
-            return await profileRepository.ListAsync();
+            return await userService.GetListProfilesAsync();
         }
 
         [HttpGet]
         [Route("Get")]
         [Authorize]
-        public async Task<Profile> Get(Guid id)
+        public async Task<ProfileView> Get(Guid id)
         {
-            return await profileRepository.GetAsync(id);
+            return await userService.GetProfileAsync(id);
         }
 
         [HttpGet]
         [Route("GetByAccountId")]
         [Authorize]
-        public async Task<Profile> GetByAccountId(Guid id)
+        public async Task<ProfileView> GetByAccountId(Guid id)
         {
-            return await profileRepository.GetByAccountIdAsync(id);
+            return await userService.GetProfileByAccountIdAsync(id);
         }
 
         [HttpGet]
         [Route("GetMyProfile")]
         [Authorize()]
 
-        public async Task<Profile> GetMyProfile()
+        public async Task<ProfileView> GetMyProfile()
         {
-            var user = HttpContext.User.Identity.Name;
-            var account = await accountRepository.GetAsync(user);
-            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
-            return profile;
+            return await userService.GetMyProfileAsync();
         }
     }
 }
