@@ -30,9 +30,10 @@ namespace WishList.WebApi
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
-            services.AddScoped<IWishListRepositoty, IWishlistRepository>();
+            services.AddScoped<IWishListRepository, IWishlistRepository>();
             services.AddScoped<IWishListItemRepository, WishListItemRepository>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IWishListService, WishListService>();
             services.AddHttpContextAccessor();
             services.AddControllers();
 

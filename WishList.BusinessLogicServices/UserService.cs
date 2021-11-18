@@ -68,6 +68,7 @@ namespace WishList.BusinessLogicServices
                     Login = x.Login,
                     Email = x.Email,
                     Gender = x.Profile.Gender.ToString(),
+                    ProfileId = x.ProfileId.Value,
                     RoleId = x.RoleId,
                     RoleName = x.Role.Name,
                     Nickname = x.Profile.Nickname
@@ -85,6 +86,7 @@ namespace WishList.BusinessLogicServices
                 Email = entity.Email,
                 Gender = entity.Profile.Gender.ToString(),
                 RoleId = entity.RoleId,
+                ProfileId = entity.ProfileId.Value,
                 RoleName = entity.Role.Name,
                 Nickname = entity.Profile.Nickname
             };
