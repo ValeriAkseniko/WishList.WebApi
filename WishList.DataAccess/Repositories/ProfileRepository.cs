@@ -21,7 +21,7 @@ namespace WishList.DataAccess.Repositories
             wishListContext.Dispose();
         }
 
-        public async Task Create(Profile profile)
+        public async Task CreateAsync(Profile profile)
         {
             await wishListContext.AddAsync(profile);
             await wishListContext.SaveChangesAsync();
@@ -32,7 +32,7 @@ namespace WishList.DataAccess.Repositories
             return await wishListContext.Profiles.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Profile> GetAsyncByAccountId(Guid accountId)
+        public async Task<Profile> GetByAccountIdAsync(Guid accountId)
         {
             return await wishListContext.Profiles.FirstOrDefaultAsync(x => x.AccountId == accountId);
         }
@@ -53,14 +53,13 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task UpdateAsync(Profile profile, Guid id)
+        public async Task UpdateAsync(Profile profile)
         {
-            var entity = await GetAsync(id);
+            var entity = await GetAsync(profile.Id);
             entity.AccountId = profile.AccountId;
             entity.Birthday = profile.Birthday;
             entity.Gender = profile.Gender;
             entity.Nickname = profile.Nickname;
-            entity.WishLists = profile.WishLists;
             wishListContext.Entry(entity).State = EntityState.Modified;
             await wishListContext.SaveChangesAsync();
         }

@@ -1,22 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using WishList.BusinessLogic.Interfaces;
-using WishList.DataAccess;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Accounts;
-using WishList.DataTransferObjects.Constants;
 using WishList.DataTransferObjects.Profile;
 using WishList.DataTransferObjects.Role;
 using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
+using WishList.Infrastructure.Constants;
 
 namespace WishList.BusinessLogicServices
 {
@@ -24,83 +23,77 @@ namespace WishList.BusinessLogicServices
     {
         private readonly IAccountRepository accountRepository;
         private readonly IProfileRepository profileRepository;
-        private readonly WishListContext wishListContext;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IRoleRepository roleRepository;
 
-        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, WishListContext wishListContext)
+        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor,IRoleRepository roleRepository)
         {
             this.accountRepository = accountRepository;
             this.profileRepository = profileRepository;
-            this.wishListContext = wishListContext;
-            _httpContextAccessor = httpContextAccessor;
+            this.httpContextAccessor = httpContextAccessor;
+            this.roleRepository = roleRepository;
         }
 
-        public async Task CreateAccount(AccountCreateRequest accountCreateRequest)
+        public async Task CreateAccountAsync(AccountCreateRequest accountCreateRequest)
         {
             var existAccount = await accountRepository.GetAsync(accountCreateRequest.Login);
             if (existAccount == null)
             {
-                Account account = new Account()
+                var account = new Account()
                 {
                     CreateDate = DateTime.Now,
                     Email = accountCreateRequest.Email,
                     HashPassword = GetHash(accountCreateRequest.Password),
                     Id = Guid.NewGuid(),
                     Login = accountCreateRequest.Login,
-                    RoleId = Permission.Id.DefaultUser
+                    RoleId = Permissions.Id.DefaultUser
                 };
-                await accountRepository.Create(account);
-                Profile profile = new Profile()
+                await accountRepository.CreateAsync(account);
+                var profile = new Profile()
                 {
                     AccountId = account.Id,
                     Id = Guid.NewGuid()
                 };
-                await profileRepository.Create(profile);
+                await profileRepository.CreateAsync(profile);
                 await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
             }
         }
 
-        public async Task<List<UsersView>> GetUserList()
+        public async Task<List<UsersView>> GetUserListAsync()
         {
-            var entitys = await accountRepository.ListAsync();
-            List<UsersView> usersView = new List<UsersView>();
-            foreach (var item in entitys)
-            {
-                UsersView userView = new UsersView()
+            var entities = await accountRepository.ListAsync();
+            return entities
+                .Select(x => new UsersView
                 {
-                    Login = item.Login,
-                    Email = item.Email,
-                    Gender = item.Profile.Gender,
-                    Role = item.Role,
-                    Nickname = item.Profile.Nickname
-                };
-                usersView.Add(userView);
-            }
-            return usersView;
+                    Login = x.Login,
+                    Email = x.Email,
+                    Gender = x.Profile.Gender.ToString(),
+                    RoleId = x.RoleId,
+                    RoleName = x.Role.Name,
+                    Nickname = x.Profile.Nickname
+                })
+                .ToList();
         }
 
-        public async Task<UsersView> GetUser()
+        public async Task<UsersView> GetUserAsync()
         {
-            var user = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var user = httpContextAccessor.HttpContext.User.Identity.Name;
             var entity = await accountRepository.GetAsync(user);
-            UsersView userView = new UsersView()
+            return new UsersView()
             {
                 Login = entity.Login,
                 Email = entity.Email,
-                Gender = entity.Profile.Gender,
-                Role = entity.Role,
+                Gender = entity.Profile.Gender.ToString(),
+                RoleId = entity.RoleId,
+                RoleName = entity.Role.Name,
                 Nickname = entity.Profile.Nickname
             };
-            return userView;
         }
 
 
-        public async Task Login(string login, string password)
+        public async Task LoginAsync(string login, string password)
         {
-            Account account = await wishListContext.Accounts
-                .Include(x => x.Role)
-                .Include(x => x.Profile)
-                .FirstOrDefaultAsync(x => x.Login == login);
+            var account = await accountRepository.GetAsync(login);
             if (account.HashPassword == GetHash(password) && account != null)
             {
                 var claims = new List<Claim>
@@ -108,46 +101,41 @@ namespace WishList.BusinessLogicServices
                     new Claim(ClaimsIdentity.DefaultNameClaimType, login),
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, account.Role.Name)
                 };
-                // создаем объект ClaimsIdentity
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                // установка аутентификационных куки
-                await _httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+                await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
             }
         }
-        public async Task Logout()
+        public async Task LogoutAsync()
         {
-            await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
 
-        public async Task UpdateProfile(ProfileUpdateRequest profileUpdateRequest)
+        public async Task UpdateMyProfileAsync(ProfileUpdateRequest profileUpdateRequest)
         {
-            var user = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var user = httpContextAccessor.HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
-            var profile = await profileRepository.GetAsyncByAccountId(account.Id);
-            var entity = await profileRepository.GetAsync(profile.Id);
-            entity.Nickname = profileUpdateRequest.Nickname;
-            entity.Gender = (Gender)profileUpdateRequest.Gender;
-            entity.Birthday = profileUpdateRequest.Birthday;
-            wishListContext.Entry(entity).State = EntityState.Modified;
-            await wishListContext.SaveChangesAsync();
+            var profile = await profileRepository.GetByAccountIdAsync(account.Id);
+
+            profile.Nickname = profileUpdateRequest.Nickname;
+            profile.Gender = (Gender)profileUpdateRequest.Gender;
+            profile.Birthday = profileUpdateRequest.Birthday;
+
+            await profileRepository.UpdateAsync(profile);
         }
 
-        public async Task<List<RoleView>> ListRoles()
+        public async Task<List<RoleView>> ListRolesAsync()
         {
-            var roles = await wishListContext.Roles.ToListAsync();
+            var entities = await roleRepository.ListAsync();
             List<RoleView> rolesView = new List<RoleView>();
-            foreach (var item in roles)
-            {
-                RoleView roleView = new RoleView()
+            return entities
+                .Select(x => new RoleView 
                 {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Description = item.Description
-                };
-                rolesView.Add(roleView);
-            }
-            return rolesView;
+                    Id = x.Id,
+                    Name=x.Name,
+                    Description=x.Description 
+                })
+                .ToList();            
         }
 
         private string GetHash(string input)

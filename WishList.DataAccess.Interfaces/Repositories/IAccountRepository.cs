@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
 
 namespace WishList.DataAccess.Interfaces.Repositories
 {
     public interface IAccountRepository : IDisposable
     {
-        Task Create(Account account);
+        Task CreateAsync(Account account);
 
         Task<Account> GetAsync(Guid id);
 

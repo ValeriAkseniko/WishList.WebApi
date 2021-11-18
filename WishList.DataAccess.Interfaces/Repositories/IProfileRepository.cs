@@ -8,17 +8,17 @@ namespace WishList.DataAccess.Interfaces.Repositories
 {
     public interface IProfileRepository
     {
-        Task Create(Profile profile);
+        Task CreateAsync(Profile profile);
 
         Task<Profile> GetAsync(Guid id);
 
-        Task<Profile> GetAsyncByAccountId(Guid accountId);
+        Task<Profile> GetByAccountIdAsync(Guid accountId);
 
         Task<List<Profile>> ListAsync();
 
         Task<List<Profile>> ListAsync(int page, int pageSize);
 
-        Task UpdateAsync(Profile profile, Guid id);
+        Task UpdateAsync(Profile profile);
 
     }
 }
