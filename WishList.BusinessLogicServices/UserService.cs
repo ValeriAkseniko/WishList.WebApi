@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 using WishList.BusinessLogic.Interfaces;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataTransferObjects.Accounts;
-using WishList.DataTransferObjects.Constants;
 using WishList.DataTransferObjects.Profile;
 using WishList.DataTransferObjects.Role;
 using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
+using WishList.Infrastructure.Constants;
 
 namespace WishList.BusinessLogicServices
 {
@@ -46,7 +46,7 @@ namespace WishList.BusinessLogicServices
                     HashPassword = GetHash(accountCreateRequest.Password),
                     Id = Guid.NewGuid(),
                     Login = accountCreateRequest.Login,
-                    RoleId = Permission.Id.DefaultUser
+                    RoleId = Permissions.Id.DefaultUser
                 };
                 await accountRepository.CreateAsync(account);
                 var profile = new Profile()

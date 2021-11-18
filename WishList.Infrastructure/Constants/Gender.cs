@@ -1,4 +1,4 @@
-﻿namespace WishList.Entities.Models
+﻿namespace WishList.Infrastructure.Constants
 {
     public enum Gender
     {

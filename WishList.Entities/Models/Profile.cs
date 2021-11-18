@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using WishList.Infrastructure.Constants;
 
 namespace WishList.Entities.Models
 {

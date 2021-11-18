@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WishList.DataTransferObjects.Constants
+namespace WishList.Infrastructure.Constants
 {
-    public static class Permission
+    public static class Permissions
     {
         public static class Id
         {
