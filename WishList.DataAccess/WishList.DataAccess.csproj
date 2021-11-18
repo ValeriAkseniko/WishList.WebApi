@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WishList.DataAccess.Interfaces\WishList.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\WishList.DataTransferObjects\WishList.DataTransferObjects.csproj" />
     <ProjectReference Include="..\WishList.Entities\WishList.Entities.csproj" />
   </ItemGroup>
 

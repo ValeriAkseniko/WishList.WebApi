@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WishList.BusinessLogic.Interfaces\WishList.BusinessLogic.Interfaces.csproj" />
+    <ProjectReference Include="..\WishList.BusinessLogicServices\WishList.BusinessLogicServices.csproj" />
     <ProjectReference Include="..\WishList.DataAccess\WishList.DataAccess.csproj" />
     <ProjectReference Include="..\WishList.DataTransferObjects\WishList.DataTransferObjects.csproj" />
   </ItemGroup>

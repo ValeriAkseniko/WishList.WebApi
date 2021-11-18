@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WishList.DataTransferObjects\WishList.DataTransferObjects.csproj" />
+  </ItemGroup>
+
 </Project>
