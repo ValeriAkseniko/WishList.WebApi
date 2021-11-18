@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WishList.BusinessLogic.Interfaces;
-using WishList.DataAccess;
 using WishList.DataTransferObjects.Role;
-using WishList.Entities.Models;
 
 namespace WishList.WebApi.Controllers
 {
@@ -15,28 +12,18 @@ namespace WishList.WebApi.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly WishListContext wishListContext;
         private readonly IUserService userService;
-        public RoleController(WishListContext wishListContext, IUserService userService)
+        public RoleController(IUserService userService)
         {
-            this.wishListContext = wishListContext;
             this.userService = userService;
         }
 
         [HttpPost]
         [Route("Create")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         public async Task Create([FromBody] RoleCreateRequest roleCreateRequest)
         {
-            Role role = new Role()
-            {
-                Id = Guid.NewGuid(),
-                Name = roleCreateRequest.Name,
-                Description = roleCreateRequest.Description
-            };
-            await wishListContext.Roles.AddAsync(role);
-            await wishListContext.SaveChangesAsync();
-
+            await userService.CreateRoleAsync(roleCreateRequest);
         }
 
         [HttpGet]
@@ -49,11 +36,10 @@ namespace WishList.WebApi.Controllers
 
         [HttpGet]
         [Route("Get")]
-        [Authorize(Roles = "admin")]
-        public async Task<Role> GetRole(Guid id)
+        [Authorize(Roles = "Admin")]
+        public async Task<RoleView> GetRole(Guid id)
         {
-            Role role = await wishListContext.Roles.FirstOrDefaultAsync(x => x.Id == id);
-            return role;
+            return await userService.GetRoleAsync(id);
         }
     }
 }

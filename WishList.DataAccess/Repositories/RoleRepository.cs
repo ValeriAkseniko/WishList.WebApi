@@ -14,6 +14,13 @@ namespace WishList.DataAccess.Repositories
         {
             this.wishListContext = wishListContext;
         }
+
+        public async Task CreateAsync(Role role)
+        {
+            await wishListContext.Roles.AddAsync(role);
+            await wishListContext.SaveChangesAsync();
+        }
+
         public void Dispose()
         {
             wishListContext.Dispose();

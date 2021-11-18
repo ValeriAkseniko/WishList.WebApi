@@ -7,7 +7,7 @@ using WishListDb = WishList.Entities.Models.WishList;
 
 namespace WishList.DataAccess.Interfaces.Repositories
 {
-    public interface IWishListRepositoty : IDisposable
+    public interface IWishListRepository : IDisposable
     {
         Task CreateAsync(WishListDb wishList);
 

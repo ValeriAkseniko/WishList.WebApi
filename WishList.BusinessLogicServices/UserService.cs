@@ -26,7 +26,7 @@ namespace WishList.BusinessLogicServices
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IRoleRepository roleRepository;
 
-        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor,IRoleRepository roleRepository)
+        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository)
         {
             this.accountRepository = accountRepository;
             this.profileRepository = profileRepository;
@@ -68,6 +68,7 @@ namespace WishList.BusinessLogicServices
                     Login = x.Login,
                     Email = x.Email,
                     Gender = x.Profile.Gender.ToString(),
+                    ProfileId = x.ProfileId.Value,
                     RoleId = x.RoleId,
                     RoleName = x.Role.Name,
                     Nickname = x.Profile.Nickname
@@ -85,6 +86,7 @@ namespace WishList.BusinessLogicServices
                 Email = entity.Email,
                 Gender = entity.Profile.Gender.ToString(),
                 RoleId = entity.RoleId,
+                ProfileId = entity.ProfileId.Value,
                 RoleName = entity.Role.Name,
                 Nickname = entity.Profile.Nickname
             };
@@ -129,13 +131,13 @@ namespace WishList.BusinessLogicServices
             var entities = await roleRepository.ListAsync();
             List<RoleView> rolesView = new List<RoleView>();
             return entities
-                .Select(x => new RoleView 
+                .Select(x => new RoleView
                 {
                     Id = x.Id,
-                    Name=x.Name,
-                    Description=x.Description 
+                    Name = x.Name,
+                    Description = x.Description
                 })
-                .ToList();            
+                .ToList();
         }
 
         private string GetHash(string input)
@@ -144,6 +146,83 @@ namespace WishList.BusinessLogicServices
             var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
 
             return Convert.ToBase64String(hash);
+        }
+
+        public async Task CreateRoleAsync(RoleCreateRequest roleCreateRequest)
+        {
+            Role role = new Role()
+            {
+                Id = Guid.NewGuid(),
+                Name = roleCreateRequest.Name,
+                Description = roleCreateRequest.Description
+            };
+            await roleRepository.CreateAsync(role);
+        }
+
+        public async Task<RoleView> GetRoleAsync(Guid id)
+        {
+            var role = await roleRepository.GetAsync(id);
+            return new RoleView
+            {
+                Description = role.Description,
+                Id = role.Id,
+                Name = role.Name
+            };
+        }
+
+        public async Task<List<ProfileView>> GetListProfilesAsync()
+        {
+            var entities = await profileRepository.ListAsync();
+            return entities
+                .Select(x => new ProfileView
+                {
+                    AccountId = x.AccountId,
+                    Birthday = x.Birthday,
+                    Gender = x.Gender,
+                    Id = x.Id,
+                    Nickname = x.Nickname
+                })
+                .ToList();
+        }
+
+        public async Task<ProfileView> GetProfileAsync(Guid id)
+        {
+            var entity = await profileRepository.GetAsync(id);
+            return new ProfileView
+            {
+                AccountId = entity.AccountId,
+                Birthday = entity.Birthday,
+                Gender = entity.Gender,
+                Id = entity.Id,
+                Nickname = entity.Nickname
+            };
+        }
+
+        public async Task<ProfileView> GetProfileByAccountIdAsync(Guid id)
+        {
+            var entity = await profileRepository.GetByAccountIdAsync(id);
+            return new ProfileView
+            {
+                AccountId = entity.AccountId,
+                Birthday = entity.Birthday,
+                Gender = entity.Gender,
+                Id = entity.Id,
+                Nickname = entity.Nickname
+            };
+        }
+
+        public async Task<ProfileView> GetMyProfileAsync()
+        {
+            var user = httpContextAccessor.HttpContext.User.Identity.Name;
+            var entity = await accountRepository.GetAsync(user);
+            return new ProfileView
+            {
+                AccountId = entity.Id,
+                Birthday = entity.Profile.Birthday,
+                Gender = entity.Profile.Gender,
+                Id = entity.ProfileId.Value,
+                Nickname = entity.Profile.Nickname
+            };
         }
     }
 }

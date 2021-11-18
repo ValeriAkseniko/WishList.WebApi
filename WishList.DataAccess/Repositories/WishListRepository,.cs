@@ -11,7 +11,7 @@ using WishListDb = WishList.Entities.Models.WishList;
 
 namespace WishList.DataAccess.Repositories
 {
-    public class IWishlistRepository : IWishListRepositoty
+    public class IWishlistRepository : IWishListRepository
     {
         private readonly WishListContext wishListContext;
 
