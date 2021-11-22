@@ -8,6 +8,7 @@ using WishList.DataTransferObjects.WishListItems;
 using WishList.DataTransferObjects.WishLists;
 using WishList.Entities.Models;
 using WishList.Infrastructure.Constants;
+using WishList.Infrastructure.Exceptions;
 using WishListDb = WishList.Entities.Models.WishList;
 
 namespace WishList.BusinessLogicServices
@@ -25,6 +26,10 @@ namespace WishList.BusinessLogicServices
 
         public async Task CreateWishListAsync(WishListCreateRequest wishListCreateRequest, Guid profileId)
         {
+            if (profileId == null)
+            {
+                throw new ProfileNotFoundException(profileId);
+            }
             WishListDb wishList = new WishListDb()
             {
                 CreateDate = DateTime.Now,
@@ -38,6 +43,10 @@ namespace WishList.BusinessLogicServices
 
         public async Task CreateWishListItemAsync(WishListItemsCreateRequest wishListItemsCreateRequest, Guid profileId)
         {
+            if (profileId == null)
+            {
+                throw new ProfileNotFoundException(profileId);
+            }
             if (wishListItemsCreateRequest.WishListItems == null || wishListItemsCreateRequest.WishListItems.Count == 0)
             {
                 return;
@@ -69,6 +78,18 @@ namespace WishList.BusinessLogicServices
 
         public async Task DeleteAsync(Guid id, Guid profileId, Guid roleId)
         {
+            if (profileId == null)
+            {
+                throw new ProfileNotFoundException(profileId);
+            }
+            if (roleId == null)
+            {
+                throw new RoleExistException(roleId);
+            }
+            if (id == null)
+            {
+                throw new WishListNotFoundException(id);
+            }
             var item = await wishListRepository.GetAsync(id);
             if (roleId == Permissions.Id.Admin || item.OwnerId == profileId)
             {
@@ -82,6 +103,18 @@ namespace WishList.BusinessLogicServices
 
         public async Task DeleteItemAsync(Guid id, Guid profileId, Guid roleId)
         {
+            if (profileId == null)
+            {
+                throw new ProfileNotFoundException(profileId);
+            }
+            if (roleId == null)
+            {
+                throw new RoleExistException(roleId);
+            }
+            if (id == null)
+            {
+                throw new WishListItemNotFoundException(id);
+            }
             var item = await wishListItemRepository.GetAsync(id);
             var wishList = await wishListRepository.GetAsync(item.WishListId);
             if (roleId == Permissions.Id.Admin || wishList.OwnerId == profileId)
@@ -96,6 +129,18 @@ namespace WishList.BusinessLogicServices
 
         public async Task<List<WishListItemView>> GetListItemsAsync(Guid wishListId, Guid profileId, Guid roleId)
         {
+            if (profileId == null)
+            {
+                throw new ProfileNotFoundException(profileId);
+            }
+            if (roleId == null)
+            {
+                throw new RoleExistException(roleId);
+            }
+            if (wishListId == null)
+            {
+                throw new WishListNotFoundException(wishListId);
+            }
             var wishlist = await wishListRepository.GetAsync(wishListId);
             if (roleId == Permissions.Id.Admin || profileId == wishlist.OwnerId)
             {
@@ -118,6 +163,10 @@ namespace WishList.BusinessLogicServices
 
         public async Task<WishListView> GetWishListAsync(Guid id)
         {
+            if (id == null)
+            {
+                throw new WishListNotFoundException(id);
+            }
             var item = await wishListRepository.GetAsync(id);
             WishListView newItem = new WishListView()
             {
@@ -141,7 +190,10 @@ namespace WishList.BusinessLogicServices
 
         public async Task<List<WishListView>> GetWishListByOwnerAsync(Guid ownerId)
         {
-
+            if (ownerId == null)
+            {
+                throw new ProfileNotFoundException(ownerId);
+            }
             var wishLists = await wishListRepository.ListAsync(ownerId);
             return wishLists
                 .Select(x => new WishListView
@@ -166,6 +218,18 @@ namespace WishList.BusinessLogicServices
 
         public async Task<WishListItemView> GetWishListItemAsync(Guid id, Guid profileId, Guid roleId)
         {
+            if (profileId == null)
+            {
+                throw new ProfileNotFoundException(profileId);
+            }
+            if (roleId == null)
+            {
+                throw new RoleExistException(roleId);
+            }
+            if (id == null)
+            {
+                throw new WishListItemNotFoundException(id);
+            }
             var listItem = await wishListItemRepository.GetAsync(id);
             var wishlist = await wishListRepository.GetAsync(listItem.WishListId);
             if (profileId == wishlist.OwnerId || roleId == Permissions.Id.Admin)
