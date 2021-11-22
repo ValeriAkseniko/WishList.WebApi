@@ -37,6 +37,14 @@ namespace WishList.BusinessLogicServices
 
         public async Task CreateAccountAsync(AccountCreateRequest accountCreateRequest)
         {
+            if (await accountRepository.LoginExistAsync(accountCreateRequest.Login))
+            {
+                throw new LoginExistException(accountCreateRequest.Login);
+            }
+            if (await accountRepository.EmailExistAsync(accountCreateRequest.Email))
+            {
+                throw new EmailExistException(accountCreateRequest.Email);
+            }
             var account = new Account()
             {
                 CreateDate = DateTime.Now,
@@ -52,14 +60,7 @@ namespace WishList.BusinessLogicServices
                 AccountId = account.Id,
                 Id = Guid.NewGuid()
             };
-            if (await accountRepository.LoginExistAsync(account))
-            {
-                throw new LoginExistException(account.Login);
-            }
-            if (await accountRepository.EmailExistAsync(account))
-            {
-                throw new EmailExistException(account.Email);
-            }
+
             await profileRepository.CreateAsync(profile);
             await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
         }
@@ -105,7 +106,7 @@ namespace WishList.BusinessLogicServices
         public async Task LoginAsync(string login, string password)
         {
             var account = await accountRepository.GetAsync(login.ToLower());
-            if (account.HashPassword == GetHash(password.ToLower()) && account != null)
+            if (account != null && account.HashPassword == GetHash(password.ToLower()))
             {
                 var claims = new List<Claim>
                 {
@@ -185,7 +186,7 @@ namespace WishList.BusinessLogicServices
             var role = await roleRepository.GetAsync(id);
             if (role == null)
             {
-                throw new RoleExistException(id);
+                throw new RoleNotFoundException(id);
             }
             return new RoleView
             {

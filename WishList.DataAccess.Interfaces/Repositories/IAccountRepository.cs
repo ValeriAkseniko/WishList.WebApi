@@ -19,8 +19,8 @@ namespace WishList.DataAccess.Interfaces.Repositories
 
         Task UpdateProfileIdAsync(Guid profileId, Guid accountId);
 
-        Task<bool> EmailExistAsync(Account user);
+        Task<bool> EmailExistAsync(string email);
 
-        Task<bool> LoginExistAsync(Account user);
+        Task<bool> LoginExistAsync(string login);
     }
 }

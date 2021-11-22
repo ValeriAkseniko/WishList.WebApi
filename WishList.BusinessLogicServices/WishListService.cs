@@ -84,7 +84,7 @@ namespace WishList.BusinessLogicServices
             }
             if (roleId == null)
             {
-                throw new RoleExistException(roleId);
+                throw new RoleNotFoundException(roleId);
             }
             if (id == null)
             {
@@ -109,7 +109,7 @@ namespace WishList.BusinessLogicServices
             }
             if (roleId == null)
             {
-                throw new RoleExistException(roleId);
+                throw new RoleNotFoundException(roleId);
             }
             if (id == null)
             {
@@ -135,7 +135,7 @@ namespace WishList.BusinessLogicServices
             }
             if (roleId == null)
             {
-                throw new RoleExistException(roleId);
+                throw new RoleNotFoundException(roleId);
             }
             if (wishListId == null)
             {
@@ -224,7 +224,7 @@ namespace WishList.BusinessLogicServices
             }
             if (roleId == null)
             {
-                throw new RoleExistException(roleId);
+                throw new RoleNotFoundException(roleId);
             }
             if (id == null)
             {
