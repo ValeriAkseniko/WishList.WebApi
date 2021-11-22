@@ -16,6 +16,7 @@ using WishList.DataTransferObjects.Role;
 using WishList.DataTransferObjects.Users;
 using WishList.Entities.Models;
 using WishList.Infrastructure.Constants;
+using WishList.Infrastructure.Exceptions;
 
 namespace WishList.BusinessLogicServices
 {
@@ -53,11 +54,11 @@ namespace WishList.BusinessLogicServices
             };
             if (await accountRepository.LoginExistAsync(account))
             {
-
+                throw new LoginExistException(account.Login);
             }
             if (await accountRepository.EmailExistAsync(account))
             {
-
+                throw new EmailExistException(account.Email);
             }
             await profileRepository.CreateAsync(profile);
             await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
@@ -84,6 +85,10 @@ namespace WishList.BusinessLogicServices
         {
             var user = httpContextAccessor.HttpContext.User.Identity.Name;
             var entity = await accountRepository.GetAsync(user);
+            if (entity == null)
+            {
+                throw new UserNotFoundException(user);
+            }
             return new UsersView()
             {
                 Login = entity.Login,
@@ -99,8 +104,8 @@ namespace WishList.BusinessLogicServices
 
         public async Task LoginAsync(string login, string password)
         {
-            var account = await accountRepository.GetAsync(login);
-            if (account.HashPassword == GetHash(password) && account != null)
+            var account = await accountRepository.GetAsync(login.ToLower());
+            if (account.HashPassword == GetHash(password.ToLower()) && account != null)
             {
                 var claims = new List<Claim>
                 {
@@ -109,6 +114,10 @@ namespace WishList.BusinessLogicServices
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                 await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+            }
+            else
+            {
+                throw new WrongLoginOrPasswordException();
             }
         }
         public async Task LogoutAsync()
@@ -121,7 +130,15 @@ namespace WishList.BusinessLogicServices
         {
             var user = httpContextAccessor.HttpContext.User.Identity.Name;
             var account = await accountRepository.GetAsync(user);
+            if (account == null)
+            {
+                throw new UserNotFoundException(user);
+            }
             var profile = await profileRepository.GetByAccountIdAsync(account.Id);
+            if (profile == null)
+            {
+                throw new ProfileNotFoundByAccountException(account.Id);
+            }
 
             profile.Nickname = profileUpdateRequest.Nickname;
             profile.Gender = (Gender)profileUpdateRequest.Gender;
@@ -166,6 +183,10 @@ namespace WishList.BusinessLogicServices
         public async Task<RoleView> GetRoleAsync(Guid id)
         {
             var role = await roleRepository.GetAsync(id);
+            if (role == null)
+            {
+                throw new RoleExistException(id);
+            }
             return new RoleView
             {
                 Description = role.Description,
@@ -192,6 +213,10 @@ namespace WishList.BusinessLogicServices
         public async Task<ProfileView> GetProfileAsync(Guid id)
         {
             var entity = await profileRepository.GetAsync(id);
+            if (entity == null)
+            {
+                throw new ProfileNotFoundException(id);
+            }
             return new ProfileView
             {
                 AccountId = entity.AccountId,
@@ -205,6 +230,10 @@ namespace WishList.BusinessLogicServices
         public async Task<ProfileView> GetProfileByAccountIdAsync(Guid id)
         {
             var entity = await profileRepository.GetByAccountIdAsync(id);
+            if (entity == null)
+            {
+                throw new ProfileNotFoundByAccountException(id);
+            }
             return new ProfileView
             {
                 AccountId = entity.AccountId,
@@ -219,6 +248,10 @@ namespace WishList.BusinessLogicServices
         {
             var user = httpContextAccessor.HttpContext.User.Identity.Name;
             var entity = await accountRepository.GetAsync(user);
+            if (entity == null)
+            {
+                throw new UserNotFoundException(user);
+            }
             return new ProfileView
             {
                 AccountId = entity.Id,
