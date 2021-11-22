@@ -35,32 +35,32 @@ namespace WishList.BusinessLogicServices
         }
 
         public async Task CreateAccountAsync(AccountCreateRequest accountCreateRequest)
-        {            
-                var account = new Account()
-                {
-                    CreateDate = DateTime.Now,
-                    Email = accountCreateRequest.Email.ToLower(),
-                    HashPassword = GetHash(accountCreateRequest.Password),
-                    Id = Guid.NewGuid(),
-                    Login = accountCreateRequest.Login.ToLower(),
-                    RoleId = Permissions.Id.DefaultUser
-                };
-                await accountRepository.CreateAsync(account);
-                var profile = new Profile()
-                {
-                    AccountId = account.Id,
-                    Id = Guid.NewGuid()
-                };
-                if (await accountRepository.LoginExistAsync(account))
-                {
+        {
+            var account = new Account()
+            {
+                CreateDate = DateTime.Now,
+                Email = accountCreateRequest.Email.ToLower(),
+                HashPassword = GetHash(accountCreateRequest.Password),
+                Id = Guid.NewGuid(),
+                Login = accountCreateRequest.Login.ToLower(),
+                RoleId = Permissions.Id.DefaultUser
+            };
+            await accountRepository.CreateAsync(account);
+            var profile = new Profile()
+            {
+                AccountId = account.Id,
+                Id = Guid.NewGuid()
+            };
+            if (await accountRepository.LoginExistAsync(account))
+            {
 
-                }
-                if (await accountRepository.EmailExistAsync(account))
-                {
+            }
+            if (await accountRepository.EmailExistAsync(account))
+            {
 
-                }
-                await profileRepository.CreateAsync(profile);
-                await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
+            }
+            await profileRepository.CreateAsync(profile);
+            await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
         }
 
         public async Task<List<UsersView>> GetUserListAsync()
