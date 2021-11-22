@@ -35,17 +35,14 @@ namespace WishList.BusinessLogicServices
         }
 
         public async Task CreateAccountAsync(AccountCreateRequest accountCreateRequest)
-        {
-            var existAccount = await accountRepository.GetAsync(accountCreateRequest.Login);
-            if (existAccount == null)
-            {
+        {            
                 var account = new Account()
                 {
                     CreateDate = DateTime.Now,
-                    Email = accountCreateRequest.Email,
+                    Email = accountCreateRequest.Email.ToLower(),
                     HashPassword = GetHash(accountCreateRequest.Password),
                     Id = Guid.NewGuid(),
-                    Login = accountCreateRequest.Login,
+                    Login = accountCreateRequest.Login.ToLower(),
                     RoleId = Permissions.Id.DefaultUser
                 };
                 await accountRepository.CreateAsync(account);
@@ -54,9 +51,16 @@ namespace WishList.BusinessLogicServices
                     AccountId = account.Id,
                     Id = Guid.NewGuid()
                 };
+                if (await accountRepository.LoginExistAsync(account))
+                {
+
+                }
+                if (await accountRepository.EmailExistAsync(account))
+                {
+
+                }
                 await profileRepository.CreateAsync(profile);
                 await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
-            }
         }
 
         public async Task<List<UsersView>> GetUserListAsync()

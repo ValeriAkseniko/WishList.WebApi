@@ -69,5 +69,17 @@ namespace WishList.DataAccess.Repositories
             await wishListContext.SaveChangesAsync();
         }
 
+        public async Task<bool> LoginExistAsync(Account user)
+        {
+            return await wishListContext.Accounts
+                .FirstOrDefaultAsync(x => x.Login.ToLower() == user.Login.ToLower()) != null;
+        }
+
+        public async Task<bool> EmailExistAsync(Account user)
+        {
+            return await wishListContext.Accounts
+                .FirstOrDefaultAsync(x => x.Email.ToLower() == user.Email.ToLower()) != null;
+        }
+
     }
 }
