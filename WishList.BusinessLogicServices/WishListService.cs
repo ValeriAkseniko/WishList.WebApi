@@ -30,7 +30,7 @@ namespace WishList.BusinessLogicServices
 
         public async Task CreateWishListAsync(WishListCreateRequest wishListCreateRequest, Guid profileId)
         {
-            if (profileId == null)
+            if (await profileRepository.ProfileExistAsync(profileId))
             {
                 throw new ProfileNotFoundException(profileId);
             }
@@ -101,7 +101,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
-                throw new RoleException();
+                throw new AccessException();
             }
         }
 
@@ -127,7 +127,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
-                throw new RoleException();
+                throw new AccessException();
             }
         }
 
@@ -161,7 +161,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
-                throw new RoleException();
+                throw new AccessException();
             }
         }
 
@@ -250,7 +250,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
-                throw new RoleException();
+                throw new AccessException();
             }
         }
 
