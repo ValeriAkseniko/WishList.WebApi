@@ -36,5 +36,11 @@ namespace WishList.DataAccess.Repositories
             List<Role> ListRoles = await wishListContext.Roles.ToListAsync();
             return ListRoles;
         }
+
+        public async Task<bool> RoleExistAsync(Guid roleId)
+        {
+            return await wishListContext.Roles
+                .FirstOrDefaultAsync(x => x.Id == roleId) != null;
+        }
     }
 }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.Entities.Models;
@@ -62,6 +61,12 @@ namespace WishList.DataAccess.Repositories
             entity.Nickname = profile.Nickname;
             wishListContext.Entry(entity).State = EntityState.Modified;
             await wishListContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> ProfileExistAsync(Guid profileId)
+        {
+            return await wishListContext.Profiles
+                .FirstOrDefaultAsync(x => x.Id == profileId) != null;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace WishList.Infrastructure.Exceptions
 {
     public sealed class UserNotFoundException : Exception
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         public string Login { get; set; }
 

@@ -10,6 +10,9 @@ namespace WishList.DataAccess.Interfaces.Repositories
         Task<List<Role>> ListAsync();
 
         Task<Role> GetAsync(Guid id);
+
         Task CreateAsync(Role role);
+
+        Task<bool> RoleExistAsync(Guid roleId);
     }
 }
