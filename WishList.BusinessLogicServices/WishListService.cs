@@ -47,7 +47,7 @@ namespace WishList.BusinessLogicServices
 
         public async Task CreateWishListItemAsync(WishListItemsCreateRequest wishListItemsCreateRequest, Guid profileId)
         {
-            if (profileId == null)
+            if (await profileRepository.ProfileExistAsync(profileId))
             {
                 throw new ProfileNotFoundException(profileId);
             }
