@@ -3,6 +3,6 @@
     public enum Gender
     {
         Man,
-        Wooman
+        Woman
     }
 }
