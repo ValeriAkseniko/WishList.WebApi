@@ -6,7 +6,7 @@ namespace WishList.Infrastructure.Exceptions
 {
     public sealed class ProfileNotFoundByAccountException : Exception
     {
-        public Guid AccountId { get; set; }
+        public Guid? AccountId { get; set; }
 
         public ProfileNotFoundByAccountException(Guid id) : base($"profile with account {id} not found")
         {

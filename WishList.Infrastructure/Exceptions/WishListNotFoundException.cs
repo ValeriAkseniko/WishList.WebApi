@@ -6,7 +6,7 @@ namespace WishList.Infrastructure.Exceptions
 {
     public sealed class WishListNotFoundException : Exception
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         public WishListNotFoundException(Guid id) : base($"{id} WishList not found")
         {

@@ -166,7 +166,6 @@ namespace WishList.BusinessLogicServices
         public async Task<List<RoleView>> ListRolesAsync()
         {
             var entities = await roleRepository.ListAsync();
-            List<RoleView> rolesView = new List<RoleView>();
             return entities
                 .Select(x => new RoleView
                 {
@@ -187,7 +186,7 @@ namespace WishList.BusinessLogicServices
 
         public async Task CreateRoleAsync(RoleCreateRequest roleCreateRequest)
         {
-            Role role = new Role()
+            var role = new Role()
             {
                 Id = Guid.NewGuid(),
                 Name = roleCreateRequest.Name,

@@ -1,8 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using WishList.Entities;
 using WishList.Entities.Models;
 
 using WishListDb = WishList.Entities.Models.WishList;
