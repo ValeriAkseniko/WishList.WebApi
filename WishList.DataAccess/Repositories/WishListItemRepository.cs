@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.Entities.Models;
@@ -81,12 +80,18 @@ namespace WishList.DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<ListItem>> LiastAsync(int page, int pageSize)
+        public async Task<List<ListItem>> ListAsync(int page, int pageSize)
         {
             return await wishListContext.ListItems
                 .OrderBy(x => x.Name)
                 .Skip(page * pageSize).Take(pageSize)
                 .ToListAsync();
+        }
+
+        public async Task<bool> WishListItemExistAsync(Guid id)
+        {
+            return await wishListContext.ListItems
+                .FirstOrDefaultAsync(x => x.Id == id) != null;
         }
     }
 }

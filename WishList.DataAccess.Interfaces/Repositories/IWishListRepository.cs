@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 using WishListDb = WishList.Entities.Models.WishList;
@@ -24,5 +23,7 @@ namespace WishList.DataAccess.Interfaces.Repositories
         Task<List<WishListDb>> ListAsync(Guid profileId, int page, int pageSize);
 
         Task<List<WishListDb>> ListAsync(int page, int pageSize);
+
+        Task<bool> WishListExistAsync(Guid wishListId);
     }
 }

@@ -20,5 +20,7 @@ namespace WishList.DataAccess.Interfaces.Repositories
 
         Task UpdateAsync(Profile profile);
 
+        Task<bool> ProfileExistAsync(Guid profileId);
+
     }
 }
