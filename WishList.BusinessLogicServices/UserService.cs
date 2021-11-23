@@ -27,9 +27,9 @@ namespace WishList.BusinessLogicServices
         private readonly IProfileRepository profileRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IRoleRepository roleRepository;
-        private readonly ILogger<WishListService> logger;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository, ILogger<WishListService> logger)
+        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository, ILogger<UserService> logger)
         {
             this.accountRepository = accountRepository;
             this.profileRepository = profileRepository;

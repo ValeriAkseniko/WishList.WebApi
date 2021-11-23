@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,19 +20,22 @@ namespace WishList.BusinessLogicServices
         private readonly IWishListItemRepository wishListItemRepository;
         private readonly IProfileRepository profileRepository;
         private readonly IRoleRepository roleRepository;
+        private readonly ILogger<WishListService> logger;
 
-        public WishListService(IWishListRepository wishListRepository, IWishListItemRepository wishListItemRepository, IProfileRepository profileRepository, IRoleRepository roleRepository)
+        public WishListService(IWishListRepository wishListRepository, IWishListItemRepository wishListItemRepository, IProfileRepository profileRepository, IRoleRepository roleRepository, ILogger<WishListService> logger)
         {
             this.wishListRepository = wishListRepository;
             this.wishListItemRepository = wishListItemRepository;
             this.profileRepository = profileRepository;
             this.roleRepository = roleRepository;
+            this.logger = logger;
         }
 
         public async Task CreateWishListAsync(WishListCreateRequest wishListCreateRequest, Guid profileId)
         {
             if (await profileRepository.ProfileExistAsync(profileId))
             {
+                logger.LogError(new ProfileNotFoundException(profileId).ToString());
                 throw new ProfileNotFoundException(profileId);
             }
             WishListDb wishList = new WishListDb()
@@ -49,6 +53,7 @@ namespace WishList.BusinessLogicServices
         {
             if (await profileRepository.ProfileExistAsync(profileId))
             {
+                logger.LogError(new ProfileNotFoundException(profileId).ToString());
                 throw new ProfileNotFoundException(profileId);
             }
             if (wishListItemsCreateRequest.WishListItems == null || wishListItemsCreateRequest.WishListItems.Count == 0)
@@ -76,6 +81,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
+                logger.LogError(new AccessException().ToString());
                 throw new AccessException();
             }
         }
@@ -84,14 +90,17 @@ namespace WishList.BusinessLogicServices
         {
             if (await profileRepository.ProfileExistAsync(profileId))
             {
+                logger.LogError(new ProfileNotFoundException(profileId).ToString());
                 throw new ProfileNotFoundException(profileId);
             }
             if (await roleRepository.RoleExistAsync(roleId))
             {
+                logger.LogError(new RoleNotFoundException(roleId).ToString());
                 throw new RoleNotFoundException(roleId);
             }
             if (await wishListRepository.WishListExistAsync(id))
             {
+                logger.LogError(new WishListNotFoundException(id).ToString());
                 throw new WishListNotFoundException(id);
             }
             var item = await wishListRepository.GetAsync(id);
@@ -101,6 +110,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
+                logger.LogError(new AccessException().ToString());
                 throw new AccessException();
             }
         }
@@ -109,24 +119,33 @@ namespace WishList.BusinessLogicServices
         {
             if (await profileRepository.ProfileExistAsync(profileId))
             {
+                logger.LogError(new ProfileNotFoundException(profileId).ToString());
                 throw new ProfileNotFoundException(profileId);
             }
             if (await roleRepository.RoleExistAsync(roleId))
             {
+                logger.LogError(new RoleNotFoundException(roleId).ToString());
                 throw new RoleNotFoundException(roleId);
             }
-            if (await wishListRepository.WishListExistAsync(id))
+            if (await wishListItemRepository.WishListItemExistAsync(id))
             {
-                throw new WishListNotFoundException(id);
+                logger.LogError(new WishListItemNotFoundException(id).ToString());
+                throw new WishListItemNotFoundException(id);
             }
             var item = await wishListItemRepository.GetAsync(id);
-            var wishList = await wishListRepository.GetAsync(item.WishListId);
+            if (await wishListRepository.WishListExistAsync(item.WishListId))
+            {
+                logger.LogError(new WishListNotFoundException(item.WishListId).ToString());
+                throw new WishListNotFoundException(item.WishListId);
+            }
+            var wishList = await wishListRepository.GetAsync(item.WishListId);            
             if (roleId == Permissions.Id.Admin || wishList.OwnerId == profileId)
             {
                 await wishListItemRepository.DeleteAsync(id);
             }
             else
             {
+                logger.LogError(new AccessException().ToString());
                 throw new AccessException();
             }
         }
@@ -135,14 +154,17 @@ namespace WishList.BusinessLogicServices
         {
             if (await profileRepository.ProfileExistAsync(profileId))
             {
+                logger.LogError(new ProfileNotFoundException(profileId).ToString());
                 throw new ProfileNotFoundException(profileId);
             }
             if (await roleRepository.RoleExistAsync(roleId))
             {
+                logger.LogError(new RoleNotFoundException(roleId).ToString());
                 throw new RoleNotFoundException(roleId);
             }
             if (await wishListRepository.WishListExistAsync(wishListId))
             {
+                logger.LogError(new WishListNotFoundException(wishListId).ToString());
                 throw new WishListNotFoundException(wishListId);
             }
             var wishlist = await wishListRepository.GetAsync(wishListId);
@@ -161,6 +183,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
+                logger.LogError(new AccessException().ToString());
                 throw new AccessException();
             }
         }
@@ -169,6 +192,7 @@ namespace WishList.BusinessLogicServices
         {
             if (await wishListRepository.WishListExistAsync(id))
             {
+                logger.LogError(new WishListNotFoundException(id).ToString());
                 throw new WishListNotFoundException(id);
             }
             var item = await wishListRepository.GetAsync(id);
@@ -196,6 +220,7 @@ namespace WishList.BusinessLogicServices
         {
             if (await profileRepository.ProfileExistAsync(ownerId))
             {
+                logger.LogError(new ProfileNotFoundException(ownerId).ToString());
                 throw new ProfileNotFoundException(ownerId);
             }
             var wishLists = await wishListRepository.ListAsync(ownerId);
@@ -224,14 +249,17 @@ namespace WishList.BusinessLogicServices
         {
             if (await profileRepository.ProfileExistAsync(profileId))
             {
+                logger.LogError(new ProfileNotFoundException(profileId).ToString());
                 throw new ProfileNotFoundException(profileId);
             }
             if (await roleRepository.RoleExistAsync(roleId))
             {
+                logger.LogError(new RoleNotFoundException(roleId).ToString());
                 throw new RoleNotFoundException(roleId);
             }
             if (await wishListItemRepository.WishListItemExistAsync(id))
             {
+                logger.LogError(new WishListItemNotFoundException(id).ToString());
                 throw new WishListItemNotFoundException(id);
             }
             var listItem = await wishListItemRepository.GetAsync(id);
@@ -250,6 +278,7 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
+                logger.LogError(new AccessException().ToString());
                 throw new AccessException();
             }
         }
