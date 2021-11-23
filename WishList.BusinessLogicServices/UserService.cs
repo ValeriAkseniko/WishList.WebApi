@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,24 +27,30 @@ namespace WishList.BusinessLogicServices
         private readonly IProfileRepository profileRepository;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IRoleRepository roleRepository;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository)
+        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository, ILogger<UserService> logger)
         {
             this.accountRepository = accountRepository;
             this.profileRepository = profileRepository;
             this.httpContextAccessor = httpContextAccessor;
             this.roleRepository = roleRepository;
+            this.logger = logger;
         }
 
         public async Task CreateAccountAsync(AccountCreateRequest accountCreateRequest)
         {
             if (await accountRepository.LoginExistAsync(accountCreateRequest.Login))
             {
-                throw new LoginExistException(accountCreateRequest.Login);
+                var exception = new LoginExistException(accountCreateRequest.Login);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             if (await accountRepository.EmailExistAsync(accountCreateRequest.Email))
             {
-                throw new EmailExistException(accountCreateRequest.Email);
+                var exception = new EmailExistException(accountCreateRequest.Email);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             var account = new Account()
             {
@@ -88,7 +95,9 @@ namespace WishList.BusinessLogicServices
             var entity = await accountRepository.GetAsync(user);
             if (entity == null)
             {
-                throw new UserNotFoundException(user);
+                var exception = new UserNotFoundException(user);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             return new UsersView()
             {
@@ -118,7 +127,9 @@ namespace WishList.BusinessLogicServices
             }
             else
             {
-                throw new WrongLoginOrPasswordException();
+                var exception = new WrongLoginOrPasswordException();
+                logger.LogError(exception.ToString());
+                throw exception;
             }
         }
         public async Task LogoutAsync()
@@ -133,12 +144,16 @@ namespace WishList.BusinessLogicServices
             var account = await accountRepository.GetAsync(user);
             if (account == null)
             {
-                throw new UserNotFoundException(user);
+                var exception = new UserNotFoundException(user);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             var profile = await profileRepository.GetByAccountIdAsync(account.Id);
             if (profile == null)
             {
-                throw new ProfileNotFoundByAccountException(account.Id);
+                var exception = new ProfileNotFoundByAccountException(account.Id);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
 
             profile.Nickname = profileUpdateRequest.Nickname;
@@ -186,7 +201,9 @@ namespace WishList.BusinessLogicServices
             var role = await roleRepository.GetAsync(id);
             if (role == null)
             {
-                throw new RoleNotFoundException(id);
+                var exception = new RoleNotFoundException(id);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             return new RoleView
             {
@@ -216,7 +233,9 @@ namespace WishList.BusinessLogicServices
             var entity = await profileRepository.GetAsync(id);
             if (entity == null)
             {
-                throw new ProfileNotFoundException(id);
+                var exception = new ProfileNotFoundException(id);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             return new ProfileView
             {
@@ -233,7 +252,9 @@ namespace WishList.BusinessLogicServices
             var entity = await profileRepository.GetByAccountIdAsync(id);
             if (entity == null)
             {
-                throw new ProfileNotFoundByAccountException(id);
+                var exception = new ProfileNotFoundByAccountException(id);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             return new ProfileView
             {
@@ -251,7 +272,9 @@ namespace WishList.BusinessLogicServices
             var entity = await accountRepository.GetAsync(user);
             if (entity == null)
             {
-                throw new UserNotFoundException(user);
+                var exception = new UserNotFoundException(user);
+                logger.LogError(exception.ToString());
+                throw exception;
             }
             return new ProfileView
             {
