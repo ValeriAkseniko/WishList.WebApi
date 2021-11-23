@@ -28,14 +28,16 @@ namespace WishList.BusinessLogicServices
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IRoleRepository roleRepository;
         private readonly ILogger<UserService> logger;
+        private readonly INotificationService notificationService;
 
-        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository, ILogger<UserService> logger)
+        public UserService(IAccountRepository accountRepository, IProfileRepository profileRepository, IHttpContextAccessor httpContextAccessor, IRoleRepository roleRepository, ILogger<UserService> logger, INotificationService notificationService)
         {
             this.accountRepository = accountRepository;
             this.profileRepository = profileRepository;
             this.httpContextAccessor = httpContextAccessor;
             this.roleRepository = roleRepository;
             this.logger = logger;
+            this.notificationService = notificationService;
         }
 
         public async Task CreateAccountAsync(AccountCreateRequest accountCreateRequest)
@@ -70,6 +72,7 @@ namespace WishList.BusinessLogicServices
 
             await profileRepository.CreateAsync(profile);
             await accountRepository.UpdateProfileIdAsync(profile.Id, account.Id);
+            await notificationService.RegistrationSuccessful(account.Email, account.Login);
         }
 
         public async Task<List<UsersView>> GetUserListAsync()

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WishList.BusinessLogic.Interfaces;
 using WishList.BusinessLogicServices;
+using WishList.BusinessLogicServices.EmailService;
 using WishList.DataAccess;
 using WishList.DataAccess.Interfaces.Repositories;
 using WishList.DataAccess.Repositories;
@@ -34,6 +35,8 @@ namespace WishList.WebApi
             services.AddScoped<IWishListItemRepository, WishListItemRepository>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IWishListService, WishListService>();
+            services.AddScoped<IEmailClient, EmailClient>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddHttpContextAccessor();
             services.AddControllers();
 
